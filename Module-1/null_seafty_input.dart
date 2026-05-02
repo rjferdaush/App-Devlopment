@@ -15,6 +15,8 @@ void main(){
   num2=stdin.readLineSync()??"Unknown";
   print(num2);
 
+  
+
   num1 ??="Unknown";
   print(num1);
 
