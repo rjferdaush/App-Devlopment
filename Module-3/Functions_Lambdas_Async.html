@@ -1,0 +1,1354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Functions, Lambdas &amp; Async</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500;600&family=Sora:wght@300;400;600;700&display=swap" rel="stylesheet" />
+<style>
+:root {
+  --bg:#f5f3ee; --bg2:#ece9e2; --bg3:#e0dbd1; --surface:#ffffff;
+  --border:#d4cfc6; --text:#1a1814; --text2:#4a4540; --text3:#7a736a;
+  --accent:#d4560a; --accent2:#2563c4; --accent3:#0f9070; --dart:#0f73b8;
+  --tag-bg:#fde8d8; --tag-text:#933c05;
+  --code-bg:#1c1917; --code-text:#e8e3db;
+  --highlight:#fff3c4; --correct:#d1f5e8; --wrong:#fde8e8;
+  --shadow:0 2px 12px rgba(0,0,0,.08),0 1px 3px rgba(0,0,0,.06);
+  --radius:14px; --transition:.25s cubic-bezier(.4,0,.2,1);
+  --fn-col:#2563c4; --async-col:#7c3aed; --async-bg:#ede8ff;
+  --future-col:#0f9070;
+}
+[data-theme="dark"] {
+  --bg:#111009; --bg2:#1a1813; --bg3:#242018; --surface:#1f1d16;
+  --border:#383328; --text:#ede8df; --text2:#b5ae9f; --text3:#706a60;
+  --accent:#f07030; --accent2:#5a9cf8; --accent3:#2ad4a8; --dart:#3fb0f0;
+  --tag-bg:#3a1e09; --tag-text:#f09050;
+  --code-bg:#0d0c09; --code-text:#e8e3db;
+  --highlight:#2d2608; --correct:#0a2419; --wrong:#2d0f0f;
+  --shadow:0 2px 16px rgba(0,0,0,.4);
+  --fn-col:#5a9cf8; --async-col:#a78bfa; --async-bg:#1e1040;
+  --future-col:#2ad4a8;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;font-size:16px}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;transition:background var(--transition),color var(--transition);line-height:1.6}
+
+/* ── Topbar ── */
+.topbar{position:fixed;top:0;left:0;right:0;z-index:100;background:var(--bg);border-bottom:1px solid var(--border);padding:10px 24px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(8px);transition:background var(--transition),border-color var(--transition)}
+.topbar-left{display:flex;align-items:center;gap:12px}
+.dart-chip{font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;background:var(--dart);color:#fff;padding:3px 10px;border-radius:99px;letter-spacing:.04em}
+.class-title{font-size:.85rem;color:var(--text2);font-weight:500}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.progress-wrap{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--text3)}
+.progress-bar{width:100px;height:5px;background:var(--bg3);border-radius:99px;overflow:hidden}
+.progress-fill{height:100%;background:var(--accent);border-radius:99px;transition:width .4s ease}
+.theme-btn{background:var(--bg3);border:1px solid var(--border);border-radius:99px;width:36px;height:36px;cursor:pointer;display:grid;place-items:center;font-size:1rem;transition:background var(--transition)}
+.theme-btn:hover{background:var(--border)}
+
+/* ── Layout ── */
+.main{max-width:860px;margin:0 auto;padding:88px 24px 80px}
+.slide{display:none;animation:fadeSlide .35s ease both}
+.slide.active{display:block}
+@keyframes fadeSlide{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── Slide headers ── */
+.slide-tag{display:inline-flex;align-items:center;gap:6px;font-family:'Space Mono',monospace;font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;background:var(--tag-bg);color:var(--tag-text);padding:4px 12px;border-radius:99px;margin-bottom:16px}
+.slide-number{color:var(--text3);font-size:.7rem;font-weight:400;margin-left:4px}
+h1.slide-title{font-family:'Sora',sans-serif;font-size:clamp(1.6rem,4vw,2.4rem);font-weight:700;line-height:1.2;color:var(--text);margin-bottom:10px}
+.slide-subtitle{font-size:1rem;color:var(--text2);margin-bottom:32px;max-width:620px;line-height:1.6}
+
+/* ── Cards ── */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px 26px;margin-bottom:18px;box-shadow:var(--shadow);transition:background var(--transition),border-color var(--transition)}
+.card-title{font-family:'Sora',sans-serif;font-size:1rem;font-weight:600;margin-bottom:12px;color:var(--text);display:flex;align-items:center;gap:8px}
+.card-icon{font-size:1.1rem}
+
+/* ── Code blocks ── */
+.code-block{background:var(--code-bg);color:var(--code-text);font-family:'Space Mono',monospace;font-size:.82rem;line-height:1.7;border-radius:10px;padding:18px 20px;overflow-x:auto;margin:12px 0;white-space:pre}
+.code-block .kw{color:#c792ea} .code-block .ty{color:#82aaff} .code-block .str{color:#c3e88d}
+.code-block .num{color:#f78c6c} .code-block .cmt{color:#546e7a;font-style:italic}
+.code-block .op{color:#89ddff} .code-block .fn{color:#82aaff}
+.code-block .hi{background:rgba(255,220,60,.15);border-radius:3px;padding:0 2px}
+.code-label{font-family:'Space Mono',monospace;font-size:.65rem;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px}
+
+/* ── Grids ── */
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:620px){.grid-2,.grid-3{grid-template-columns:1fr}}
+
+/* ── Analogy ── */
+.analogy{background:var(--highlight);border-left:4px solid var(--accent);border-radius:0 10px 10px 0;padding:14px 18px;margin:14px 0;font-size:.92rem;color:var(--text2)}
+.analogy strong{color:var(--text)}
+
+/* ── Table ── */
+.op-table{width:100%;border-collapse:collapse;font-size:.875rem}
+.op-table th{background:var(--bg2);color:var(--text2);font-family:'Space Mono',monospace;font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;padding:10px 14px;text-align:left;border-bottom:2px solid var(--border)}
+.op-table td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top}
+.op-table tr:last-child td{border-bottom:none}
+.op-table tr:hover td{background:var(--bg2)}
+.op-table code{font-family:'Space Mono',monospace;font-size:.8rem;background:var(--bg3);padding:1px 6px;border-radius:4px}
+
+/* ── Quiz ── */
+.quiz-question{font-size:1rem;font-weight:600;margin-bottom:16px;font-family:'Sora',sans-serif;color:var(--text);line-height:1.4}
+.quiz-options{display:flex;flex-direction:column;gap:10px}
+.quiz-option{background:var(--bg2);border:2px solid var(--border);border-radius:10px;padding:12px 18px;cursor:pointer;font-size:.9rem;color:var(--text);transition:all .18s ease;display:flex;align-items:center;gap:10px;text-align:left;width:100%}
+.quiz-option:hover{border-color:var(--accent);background:var(--bg3)}
+.quiz-option.correct{border-color:var(--accent3);background:var(--correct)}
+.quiz-option.wrong{border-color:#e74c3c;background:var(--wrong)}
+.quiz-option.disabled{pointer-events:none}
+.quiz-option-letter{font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700;width:24px;height:24px;border-radius:6px;background:var(--bg3);color:var(--text2);display:grid;place-items:center;flex-shrink:0}
+.quiz-feedback{margin-top:14px;padding:12px 16px;border-radius:10px;font-size:.9rem;display:none}
+.quiz-feedback.show{display:block}
+.quiz-feedback.good{background:var(--correct);color:var(--accent3)}
+.quiz-feedback.bad{background:var(--wrong);color:#c0392b}
+[data-theme="dark"] .quiz-feedback.good{color:var(--accent3)}
+[data-theme="dark"] .quiz-feedback.bad{color:#f0706a}
+
+/* ── Fill ── */
+.fill-input{border:2px solid var(--border);background:var(--bg2);color:var(--text);font-family:'Space Mono',monospace;font-size:.9rem;padding:4px 10px;border-radius:8px;width:160px;text-align:center;transition:border-color .18s}
+.fill-input:focus{outline:none;border-color:var(--accent2)}
+.fill-input.correct{border-color:var(--accent3);background:var(--correct)}
+.fill-input.wrong{border-color:#e74c3c;background:var(--wrong)}
+.check-btn{font-family:'Space Mono',monospace;font-size:.78rem;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:7px 16px;cursor:pointer;transition:opacity .18s;font-weight:700}
+.check-btn:hover{opacity:.85}
+
+/* ── Nav ── */
+.nav-row{display:flex;align-items:center;justify-content:space-between;margin-top:32px;padding-top:24px;border-top:1px solid var(--border)}
+.nav-btn{font-family:'Space Mono',monospace;font-size:.8rem;font-weight:700;padding:10px 22px;border-radius:10px;cursor:pointer;transition:all .18s;border:2px solid transparent;display:flex;align-items:center;gap:6px}
+.nav-btn-prev{background:var(--bg2);color:var(--text2);border-color:var(--border)}
+.nav-btn-prev:hover{background:var(--bg3);color:var(--text)}
+.nav-btn-next{background:var(--accent);color:#fff}
+.nav-btn-next:hover{opacity:.88}
+.nav-btn:disabled{opacity:.35;cursor:not-allowed}
+.slide-dots{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;max-width:300px}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--border);transition:all .2s;cursor:pointer;border:none}
+.dot.active{background:var(--accent);transform:scale(1.3)}
+
+/* ── Hero ── */
+.hero-kicker{font-family:'Space Mono',monospace;font-size:.75rem;text-transform:uppercase;letter-spacing:.12em;color:var(--accent);margin-bottom:10px}
+.hero-divider{width:48px;height:4px;border-radius:2px;background:var(--accent);margin:20px 0}
+.topic-pill{display:inline-flex;align-items:center;gap:6px;background:var(--bg2);border:1px solid var(--border);border-radius:99px;padding:6px 14px;font-size:.82rem;color:var(--text2);margin:4px 4px 4px 0}
+.topic-pill .dot-sm{width:6px;height:6px;border-radius:50%;background:var(--accent);flex-shrink:0}
+
+/* ── Summary ── */
+.summary-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+.summary-chip{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 16px;font-size:.82rem;color:var(--text2);display:flex;flex-direction:column;gap:3px}
+.summary-chip strong{color:var(--text);font-family:'Space Mono',monospace;font-size:.88rem}
+
+@media(max-width:520px){
+  .topbar{padding:8px 14px} .class-title{display:none}
+  .progress-bar{width:60px} .main{padding:76px 14px 70px} .card{padding:16px}
+}
+
+/* ══ LECTURE-SPECIFIC ════════════════════════════ */
+
+/* ── Function anatomy visual ─────────────────── */
+.fn-anatomy{font-family:'Space Mono',monospace;font-size:.85rem;line-height:1;margin:18px 0}
+.fn-row{display:flex;align-items:center;gap:0;flex-wrap:wrap}
+.fn-part{padding:10px 14px;font-weight:700;white-space:nowrap}
+.fn-part.ret{background:#ddeeff;color:#1a4eb0;border-radius:10px 0 0 10px;border:2px solid #1a4eb0;border-right:none}
+.fn-part.name{background:var(--async-bg);color:var(--async-col);border:2px solid var(--async-col);border-right:none;border-left:none}
+.fn-part.params{background:var(--highlight);color:#92400e;border:2px solid #d4a017;border-right:none;border-left:none}
+.fn-part.body{background:var(--correct);color:#0a6644;border:2px solid var(--accent3);border-radius:0 10px 10px 0}
+[data-theme="dark"] .fn-part.ret{background:#0d2545;color:#5a9cf8;border-color:#5a9cf8}
+[data-theme="dark"] .fn-part.params{color:var(--json-col,#fbbf24);border-color:#8b6914}
+.fn-legend{display:flex;gap:12px;flex-wrap:wrap;margin-top:10px}
+.fn-legend-item{display:flex;align-items:center;gap:6px;font-size:.75rem;color:var(--text2)}
+.fn-legend-dot{width:10px;height:10px;border-radius:3px}
+
+/* ── Param type tabs ─────────────────────────── */
+.param-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.param-tab{font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700;padding:7px 16px;border-radius:8px;cursor:pointer;border:2px solid var(--border);background:var(--bg2);color:var(--text2);transition:all .18s}
+.param-tab:hover{border-color:var(--accent2)}
+.param-tab.active{border-color:var(--accent2);background:#ddeeff;color:#1a4eb0}
+[data-theme="dark"] .param-tab.active{background:#0d2545;color:#5a9cf8}
+.param-demo{background:var(--code-bg);border-radius:10px;padding:16px 20px;font-family:'Space Mono',monospace;font-size:.82rem;color:var(--code-text);white-space:pre;line-height:1.8;min-height:100px;transition:opacity .15s}
+.param-explain{font-size:.88rem;color:var(--text2);line-height:1.7;margin-top:12px;padding:12px 16px;background:var(--bg2);border-radius:10px}
+
+/* ── Call builder playground ─────────────────── */
+.call-output{background:var(--code-bg);border-radius:10px;padding:14px 20px;font-family:'Space Mono',monospace;font-size:.85rem;color:var(--code-text);white-space:pre;line-height:1.9;min-height:54px;margin-top:10px}
+.param-input{font-family:'Space Mono',monospace;font-size:.85rem;padding:7px 12px;border-radius:8px;border:2px solid var(--border);background:var(--bg2);color:var(--text);width:140px;transition:border-color .18s}
+.param-input:focus{outline:none;border-color:var(--dart)}
+.input-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:10px}
+.run-btn{font-family:'Space Mono',monospace;font-size:.78rem;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer;border:none;background:var(--async-col);color:#fff;transition:opacity .18s}
+.run-btn:hover{opacity:.82}
+
+/* ── Lambda explorer ─────────────────────────── */
+.lambda-tabs{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap}
+.lambda-tab{font-family:'Space Mono',monospace;font-size:.72rem;font-weight:700;padding:6px 14px;border-radius:8px;cursor:pointer;border:2px solid var(--border);background:var(--bg2);color:var(--text2);transition:all .18s}
+.lambda-tab.active{border-color:var(--future-col);background:var(--correct);color:#0a6644}
+[data-theme="dark"] .lambda-tab.active{color:var(--accent3)}
+
+/* ── Async timeline ──────────────────────────── */
+.timeline{display:flex;flex-direction:column;gap:0;position:relative;padding-left:32px}
+.timeline::before{content:"";position:absolute;left:10px;top:8px;bottom:8px;width:2px;background:var(--border)}
+.timeline-item{position:relative;padding:10px 0 10px 16px;display:flex;flex-direction:column;gap:3px}
+.timeline-dot{position:absolute;left:-26px;top:14px;width:14px;height:14px;border-radius:50%;border:3px solid var(--surface);z-index:1}
+.timeline-dot.sync{background:var(--fn-col);box-shadow:0 0 0 2px var(--fn-col)}
+.timeline-dot.async-d{background:var(--async-col);box-shadow:0 0 0 2px var(--async-col)}
+.timeline-dot.done{background:var(--future-col);box-shadow:0 0 0 2px var(--future-col)}
+.timeline-dot.err{background:#e74c3c;box-shadow:0 0 0 2px #e74c3c}
+.timeline-label{font-family:'Space Mono',monospace;font-size:.75rem;font-weight:700;color:var(--text)}
+.timeline-desc{font-size:.82rem;color:var(--text2)}
+.timeline-badge{display:inline-block;font-family:'Space Mono',monospace;font-size:.65rem;font-weight:700;padding:1px 8px;border-radius:4px;margin-left:6px;vertical-align:middle}
+.badge-sync{background:#ddeeff;color:#1a4eb0}
+.badge-async{background:var(--async-bg);color:var(--async-col)}
+.badge-future{background:var(--correct);color:var(--future-col)}
+.badge-err{background:var(--wrong);color:#c0392b}
+[data-theme="dark"] .badge-err{color:#f0706a}
+
+/* ── Async simulator ─────────────────────────── */
+.sim-track{display:flex;flex-direction:column;gap:8px;margin:12px 0}
+.sim-task{display:flex;align-items:center;gap:12px;padding:10px 16px;border-radius:10px;border:2px solid var(--border);background:var(--bg2);font-family:'Space Mono',monospace;font-size:.8rem;transition:all .3s}
+.sim-task.running{border-color:var(--async-col);background:var(--async-bg)}
+.sim-task.done{border-color:var(--future-col);background:var(--correct)}
+.sim-task.error{border-color:#e74c3c;background:var(--wrong)}
+.sim-task.waiting{opacity:.45}
+.sim-dot{width:10px;height:10px;border-radius:50%;background:var(--border);flex-shrink:0;transition:background .3s}
+.sim-task.running .sim-dot{background:var(--async-col)}
+.sim-task.done .sim-dot{background:var(--future-col)}
+.sim-task.error .sim-dot{background:#e74c3c}
+.sim-label{flex:1}
+.sim-badge{font-family:'Space Mono',monospace;font-size:.65rem;font-weight:700;padding:1px 8px;border-radius:4px}
+.sim-output{background:var(--code-bg);border-radius:8px;padding:10px 16px;font-family:'Space Mono',monospace;font-size:.78rem;color:var(--code-text);white-space:pre;line-height:1.8;min-height:40px;margin-top:8px}
+.sim-btn{font-family:'Space Mono',monospace;font-size:.78rem;font-weight:700;padding:8px 18px;border-radius:8px;cursor:pointer;border:none;transition:opacity .18s;margin-right:8px}
+.sim-btn-run{background:var(--future-col);color:#fff}
+.sim-btn-reset{background:var(--bg3);color:var(--text2);border:1px solid var(--border)}
+.sim-btn:hover{opacity:.82}
+.sim-btn:disabled{opacity:.35;cursor:not-allowed}
+
+/* ── Future chain visual ─────────────────────── */
+.chain-wrap{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin:14px 0}
+.chain-box{padding:10px 16px;border-radius:10px;font-family:'Space Mono',monospace;font-size:.78rem;font-weight:700;border:2px solid var(--border);background:var(--bg2);color:var(--text);flex-shrink:0}
+.chain-box.future-b{border-color:var(--async-col);background:var(--async-bg);color:var(--async-col)}
+.chain-box.then-b{border-color:var(--future-col);background:var(--correct);color:var(--future-col)}
+[data-theme="dark"] .chain-box.then-b{color:var(--accent3)}
+.chain-box.catch-b{border-color:#e74c3c;background:var(--wrong);color:#c0392b}
+[data-theme="dark"] .chain-box.catch-b{color:#f0706a}
+.chain-arrow{font-size:.9rem;color:var(--text3);padding:0 6px;align-self:center;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<header class="topbar" role="banner">
+  <div class="topbar-left">
+    <span class="dart-chip">Dart</span>
+    <span class="class-title">Functions, Lambdas &amp; Async</span>
+  </div>
+  <div class="topbar-right">
+    <div class="progress-wrap" aria-label="Lecture progress">
+      <span id="progressText">1 / 16</span>
+      <div class="progress-bar" role="progressbar" aria-valuenow="1" aria-valuemin="1" aria-valuemax="16">
+        <div class="progress-fill" id="progressFill" style="width:6.25%"></div>
+      </div>
+    </div>
+    <button class="theme-btn" id="themeBtn" aria-label="Toggle dark mode">🌙</button>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- ══ SLIDE 1 — Welcome ════════════════════════ -->
+<section class="slide active" id="slide-1" aria-label="Slide 1: Introduction">
+  <p class="hero-kicker">Functions &amp; Async &middot; Module 1</p>
+  <h1 class="slide-title">Functions, Lambdas<br>&amp; Async Programming</h1>
+  <div class="hero-divider"></div>
+  <p class="slide-subtitle">We know how to store data and control flow. Now we learn how to <em>package behaviour</em> into reusable units &mdash; and how to write code that doesn&rsquo;t freeze while waiting for slow things to finish.</p>
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🗺️</span> Today&rsquo;s Journey</p>
+    <div>
+      <span class="topic-pill"><span class="dot-sm"></span>Why functions exist</span>
+      <span class="topic-pill"><span class="dot-sm"></span>Defining functions</span>
+      <span class="topic-pill"><span class="dot-sm"></span>Positional parameters</span>
+      <span class="topic-pill"><span class="dot-sm"></span>Named parameters</span>
+      <span class="topic-pill"><span class="dot-sm"></span>Optional &amp; required</span>
+      <span class="topic-pill"><span class="dot-sm"></span>Arrow syntax =&gt;</span>
+      <span class="topic-pill"><span class="dot-sm"></span>Anonymous functions</span>
+      <span class="topic-pill"><span class="dot-sm"></span>Sync vs Async</span>
+      <span class="topic-pill"><span class="dot-sm"></span>Future</span>
+      <span class="topic-pill"><span class="dot-sm"></span>.then() / .catchError()</span>
+    </div>
+  </div>
+  <div class="analogy">
+    🧱 <strong>The shift in thinking:</strong> Until now, we&rsquo;ve written instructions that run once, top to bottom. Functions let you <em>name a set of instructions</em> and call them whenever you need &mdash; like saving a recipe instead of rewriting it every time you cook. Async takes it further: you can start cooking something slow and do other things while you wait.
+  </div>
+</section>
+
+<!-- ══ SLIDE 2 — Why Functions Exist ═══════════ -->
+<section class="slide" id="slide-2" aria-label="Slide 2: Why functions exist">
+  <span class="slide-tag">💡 Motivation <span class="slide-number">02</span></span>
+  <h1 class="slide-title">Why Do Functions Exist?</h1>
+  <p class="slide-subtitle">Feel the problem. Then the solution makes perfect sense.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">😰</span> Without functions &mdash; repetition everywhere</p>
+    <p style="font-size:.88rem;color:var(--text2);margin-bottom:12px;">You need to show a greeting for three different users:</p>
+    <div class="code-block"><span class="cmt">// For Ayaan:</span>
+<span class="fn">print</span>(<span class="str">"Hello, Ayaan! Welcome back."</span>);
+<span class="fn">print</span>(<span class="str">"You have 3 new messages."</span>);
+
+<span class="cmt">// For Sara:</span>
+<span class="fn">print</span>(<span class="str">"Hello, Sara! Welcome back."</span>);
+<span class="fn">print</span>(<span class="str">"You have 3 new messages."</span>);
+
+<span class="cmt">// For Rafi:</span>
+<span class="fn">print</span>(<span class="str">"Hello, Rafi! Welcome back."</span>);
+<span class="fn">print</span>(<span class="str">"You have 3 new messages."</span>);
+<span class="cmt">// Same logic, copy-pasted 3 times. What if the message changes?</span>
+<span class="cmt">// You'd need to find and fix every single copy. 😩</span></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">✅</span> With a function &mdash; write once, call anywhere</p>
+    <div class="code-block"><span class="kw">void</span> <span class="fn">greet</span>(<span class="ty">String</span> name) {
+  <span class="fn">print</span>(<span class="str">"Hello, <span class="hi">$name</span>! Welcome back."</span>);
+  <span class="fn">print</span>(<span class="str">"You have 3 new messages."</span>);
+}
+
+<span class="fn">greet</span>(<span class="str">"Ayaan"</span>); <span class="cmt">// Hello, Ayaan! Welcome back.</span>
+<span class="fn">greet</span>(<span class="str">"Sara"</span>);  <span class="cmt">// Hello, Sara! Welcome back.</span>
+<span class="fn">greet</span>(<span class="str">"Rafi"</span>);  <span class="cmt">// Hello, Rafi! Welcome back.</span></div>
+    <p style="font-size:.85rem;color:var(--text2);margin-top:10px;">Change the message in <em>one place</em>, fix it everywhere instantly.</p>
+  </div>
+
+  <div class="analogy">
+    🍳 <strong>Functions are like recipes.</strong> You don&rsquo;t rewrite &ldquo;how to make tea&rdquo; every morning. You follow the recipe once, name it, and call it whenever you want tea. The function is the recipe; calling it is making the tea.
+  </div>
+</section>
+
+<!-- ══ SLIDE 3 — Anatomy of a Function ══════════ -->
+<section class="slide" id="slide-3" aria-label="Slide 3: Function anatomy">
+  <span class="slide-tag">🔧 Functions <span class="slide-number">03</span></span>
+  <h1 class="slide-title">Anatomy of a Function</h1>
+  <p class="slide-subtitle">Every function has four parts. Learn what each one means.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🔬</span> The four parts</p>
+    <div class="fn-anatomy">
+      <div class="fn-row">
+        <div class="fn-part ret">int</div>
+        <div class="fn-part name">add</div>
+        <div class="fn-part params">(int a, int b)</div>
+        <div class="fn-part body">{ return a + b; }</div>
+      </div>
+    </div>
+    <div class="fn-legend">
+      <div class="fn-legend-item"><div class="fn-legend-dot" style="background:#ddeeff;border:1.5px solid #1a4eb0;"></div>Return type</div>
+      <div class="fn-legend-item"><div class="fn-legend-dot" style="background:var(--async-bg);border:1.5px solid var(--async-col);"></div>Name</div>
+      <div class="fn-legend-item"><div class="fn-legend-dot" style="background:var(--highlight);border:1.5px solid #d4a017;"></div>Parameters</div>
+      <div class="fn-legend-item"><div class="fn-legend-dot" style="background:var(--correct);border:1.5px solid var(--accent3);"></div>Body</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">📐</span> Full syntax reference</p>
+    <div class="code-block"><span class="cmt">// returnType  functionName  (parameters) { body }</span>
+
+<span class="ty">int</span>  <span class="fn">add</span>    (<span class="ty">int</span> a, <span class="ty">int</span> b)  { <span class="kw">return</span> a <span class="op">+</span> b; }
+<span class="ty">String</span> <span class="fn">greet</span> (<span class="ty">String</span> name) { <span class="kw">return</span> <span class="str">"Hello <span class="hi">$name</span>"</span>; }
+<span class="kw">void</span>   <span class="fn">log</span>   (<span class="ty">String</span> msg)  { <span class="fn">print</span>(msg); } <span class="cmt">// void = no return value</span>
+
+<span class="cmt">// Call them:</span>
+<span class="fn">print</span>(<span class="fn">add</span>(<span class="num">3</span>, <span class="num">4</span>));       <span class="cmt">// 7</span>
+<span class="fn">print</span>(<span class="fn">greet</span>(<span class="str">"Sara"</span>));  <span class="cmt">// Hello Sara</span>
+<span class="fn">log</span>(<span class="str">"App started"</span>);   <span class="cmt">// App started</span></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🔑</span> Return types at a glance</p>
+    <table class="op-table" aria-label="Return types">
+      <thead><tr><th>Return type</th><th>Meaning</th><th>Example</th></tr></thead>
+      <tbody>
+        <tr><td><code>void</code></td><td>Returns nothing (just does something)</td><td><code>print()</code>, logging</td></tr>
+        <tr><td><code>int</code></td><td>Returns a whole number</td><td><code>add(3, 4)</code></td></tr>
+        <tr><td><code>String</code></td><td>Returns text</td><td><code>greet("Ayaan")</code></td></tr>
+        <tr><td><code>bool</code></td><td>Returns true or false</td><td><code>isEven(4)</code></td></tr>
+        <tr><td><code>List&lt;T&gt;</code></td><td>Returns a list</td><td><code>getNames()</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ══ SLIDE 4 — Parameters ═════════════════════ -->
+<section class="slide" id="slide-4" aria-label="Slide 4: Parameters">
+  <span class="slide-tag">🔧 Functions <span class="slide-number">04</span></span>
+  <h1 class="slide-title">Parameters</h1>
+  <p class="slide-subtitle">Parameters are the inputs a function accepts. Dart has several flavours &mdash; each with a clear purpose.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🗂️</span> Choose a parameter type</p>
+    <div class="param-tabs" role="tablist" id="paramTabRow">
+      <button class="param-tab active" role="tab" aria-selected="true" onclick="showParam(0,this)">Positional</button>
+      <button class="param-tab" role="tab" aria-selected="false" onclick="showParam(1,this)">Named</button>
+      <button class="param-tab" role="tab" aria-selected="false" onclick="showParam(2,this)">Optional positional</button>
+      <button class="param-tab" role="tab" aria-selected="false" onclick="showParam(3,this)">Default values</button>
+    </div>
+    <div class="param-demo" id="paramDemo"></div>
+    <div class="param-explain" id="paramExplain"></div>
+  </div>
+
+  <div class="analogy">
+    📞 <strong>Think of named parameters like ordering food:</strong> positional = &ldquo;large, pepperoni, thin crust&rdquo; (order matters); named = &ldquo;size: large, topping: pepperoni, crust: thin&rdquo; (order doesn&rsquo;t matter, labels do). Named parameters make call sites self-documenting.
+  </div>
+</section>
+
+<!-- ══ SLIDE 5 — Required & Optional Named ══════ -->
+<section class="slide" id="slide-5" aria-label="Slide 5: Required and optional named parameters">
+  <span class="slide-tag">🔧 Functions <span class="slide-number">05</span></span>
+  <h1 class="slide-title">Required &amp; Optional Named</h1>
+  <p class="slide-subtitle">Named parameters can be declared as <strong>required</strong> (must be passed) or <strong>optional</strong> (have a default). This is extremely common in Flutter widgets.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">📐</span> required vs optional named</p>
+    <div class="code-block"><span class="cmt">// required: caller MUST provide this argument</span>
+<span class="kw">void</span> <span class="fn">createAccount</span>({
+  <span class="kw">required</span> <span class="ty">String</span> username,  <span class="cmt">// must pass</span>
+  <span class="kw">required</span> <span class="ty">String</span> email,     <span class="cmt">// must pass</span>
+  <span class="ty">bool</span> isAdmin <span class="op">=</span> <span class="kw">false</span>,        <span class="cmt">// optional — defaults to false</span>
+  <span class="ty">int</span>  maxPosts <span class="op">=</span> <span class="num">100</span>,          <span class="cmt">// optional — defaults to 100</span>
+}) {
+  <span class="fn">print</span>(<span class="str">"Created: <span class="hi">$username</span>, admin=<span class="hi">$isAdmin</span>, maxPosts=<span class="hi">$maxPosts</span>"</span>);
+}
+
+<span class="fn">createAccount</span>(
+  username: <span class="str">"ayaan_dev"</span>,
+  email: <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="7e1f071f1f103e1b061f130e121b501d1113">[email&#160;protected]</a>"</span>,
+); <span class="cmt">// Created: ayaan_dev, admin=false, maxPosts=100</span>
+
+<span class="fn">createAccount</span>(
+  username: <span class="str">"sara_admin"</span>,
+  email: <span class="str">"<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="d3a0b2a1b293b6abb2bea3bfb6fdb0bcbe">[email&#160;protected]</a>"</span>,
+  isAdmin: <span class="kw">true</span>,
+  maxPosts: <span class="num">500</span>,
+); <span class="cmt">// Created: sara_admin, admin=true, maxPosts=500</span></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">💡</span> Why this matters in Flutter</p>
+    <div class="code-block"><span class="cmt">// Flutter widgets use named parameters everywhere</span>
+<span class="fn">Text</span>(
+  <span class="str">"Hello World"</span>,          <span class="cmt">// positional (the text)</span>
+  style: <span class="fn">TextStyle</span>(
+    fontSize: <span class="num">24</span>,            <span class="cmt">// named, optional</span>
+    fontWeight: <span class="fn">FontWeight</span>.bold, <span class="cmt">// named, optional</span>
+    color: <span class="fn">Colors</span>.blue,        <span class="cmt">// named, optional</span>
+  ),
+)
+
+<span class="cmt">// All named → you can pass in any order, skip any optional one</span></div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 6 — Parameter Playground ══════════ -->
+<section class="slide" id="slide-6" aria-label="Slide 6: Parameter playground">
+  <span class="slide-tag">🎮 Interactive <span class="slide-number">06</span></span>
+  <h1 class="slide-title">Parameter Playground</h1>
+  <p class="slide-subtitle">Call the function by filling in the arguments. Watch the output change as you type.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">⚙️</span> Function being called</p>
+    <div class="code-block"><span class="kw">void</span> <span class="fn">buildProfile</span>({
+  <span class="kw">required</span> <span class="ty">String</span> name,
+  <span class="kw">required</span> <span class="ty">int</span> age,
+  <span class="ty">String</span> city <span class="op">=</span> <span class="str">"Unknown"</span>,
+  <span class="ty">bool</span> isPremium <span class="op">=</span> <span class="kw">false</span>,
+})</div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">📞</span> Call it</p>
+    <div class="input-row">
+      <div>
+        <p class="code-label">name (required)</p>
+        <input type="text" class="param-input" id="pName" placeholder="Ayaan" maxlength="16" aria-label="Name argument" />
+      </div>
+      <div>
+        <p class="code-label">age (required)</p>
+        <input type="number" class="param-input" id="pAge" placeholder="22" min="1" max="99" aria-label="Age argument" style="width:90px" />
+      </div>
+      <div>
+        <p class="code-label">city (optional)</p>
+        <input type="text" class="param-input" id="pCity" placeholder="Dhaka" maxlength="16" aria-label="City argument" />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        <p class="code-label">isPremium</p>
+        <label style="display:flex;align-items:center;gap:8px;font-family:'Space Mono',monospace;font-size:.82rem;cursor:pointer;">
+          <input type="checkbox" id="pPremium" aria-label="isPremium toggle" style="width:16px;height:16px;accent-color:var(--async-col)" />
+          true
+        </label>
+      </div>
+      <button class="run-btn" onclick="runProfile()" aria-label="Run function call">&#9654; Run</button>
+    </div>
+    <div class="call-output" id="callOutput"><span style="color:#546e7a;font-style:italic;">// output will appear here&hellip;</span></div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 7 — Arrow Syntax ═══════════════════ -->
+<section class="slide" id="slide-7" aria-label="Slide 7: Arrow syntax">
+  <span class="slide-tag">🏹 Arrow &amp; Lambda <span class="slide-number">07</span></span>
+  <h1 class="slide-title">Arrow Syntax <code style="font-family:'Sora',sans-serif;font-size:1.9rem;">=&gt;</code></h1>
+  <p class="slide-subtitle">When a function body is a <strong>single expression</strong>, you can replace <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 8px;border-radius:4px;">{ return expr; }</code> with the shorthand <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 8px;border-radius:4px;">=> expr</code>. Same result, less noise.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">⚖️</span> Before and after</p>
+    <div class="grid-2">
+      <div>
+        <p class="code-label">Standard syntax</p>
+        <div class="code-block" style="margin:0;font-size:.78rem;"><span class="ty">int</span> <span class="fn">add</span>(<span class="ty">int</span> a, <span class="ty">int</span> b) {
+  <span class="kw">return</span> a <span class="op">+</span> b;
+}
+
+<span class="ty">bool</span> <span class="fn">isEven</span>(<span class="ty">int</span> n) {
+  <span class="kw">return</span> n <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>;
+}
+
+<span class="ty">String</span> <span class="fn">greet</span>(<span class="ty">String</span> name) {
+  <span class="kw">return</span> <span class="str">"Hello, <span class="hi">$name</span>!"</span>;
+}</div>
+      </div>
+      <div>
+        <p class="code-label">Arrow syntax (identical)</p>
+        <div class="code-block" style="margin:0;font-size:.78rem;"><span class="ty">int</span> <span class="fn">add</span>(<span class="ty">int</span> a, <span class="ty">int</span> b)
+  <span class="op">=></span> a <span class="op">+</span> b;
+
+<span class="ty">bool</span> <span class="fn">isEven</span>(<span class="ty">int</span> n)
+  <span class="op">=></span> n <span class="op">%</span> <span class="num">2</span> <span class="op">==</span> <span class="num">0</span>;
+
+<span class="ty">String</span> <span class="fn">greet</span>(<span class="ty">String</span> name)
+  <span class="op">=></span> <span class="str">"Hello, <span class="hi">$name</span>!"</span>;</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">📐</span> Arrow with named parameters &amp; in practice</p>
+    <div class="code-block"><span class="cmt">// Arrow + named parameters</span>
+<span class="ty">double</span> <span class="fn">tax</span>({<span class="kw">required</span> <span class="ty">double</span> price, <span class="ty">double</span> rate <span class="op">=</span> <span class="num">0.15</span>})
+  <span class="op">=></span> price <span class="op">*</span> rate;
+
+<span class="fn">print</span>(<span class="fn">tax</span>(price: <span class="num">1000</span>));       <span class="cmt">// 150.0</span>
+<span class="fn">print</span>(<span class="fn">tax</span>(price: <span class="num">500</span>, rate: <span class="num">0.05</span>)); <span class="cmt">// 25.0</span>
+
+<span class="cmt">// Very common in List methods (sort, where, map)</span>
+<span class="ty">List</span><span class="op">&lt;</span><span class="ty">int</span><span class="op">&gt;</span> nums <span class="op">=</span> [<span class="num">5</span>, <span class="num">1</span>, <span class="num">3</span>, <span class="num">2</span>, <span class="num">4</span>];
+nums.<span class="fn">sort</span>((a, b) <span class="op">=></span> a <span class="op">-</span> b);
+<span class="fn">print</span>(nums); <span class="cmt">// [1, 2, 3, 4, 5]</span></div>
+    <div class="analogy" style="margin-top:12px;margin-bottom:0;">
+      ✏️ <strong>Rule of thumb:</strong> if the entire body is <em>one expression that produces a value</em>, arrow it. If it has multiple statements, variable declarations, or conditionals &mdash; keep the curly braces.
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 8 — Anonymous Functions & Lambdas ═ -->
+<section class="slide" id="slide-8" aria-label="Slide 8: Anonymous functions">
+  <span class="slide-tag">🏹 Arrow &amp; Lambda <span class="slide-number">08</span></span>
+  <h1 class="slide-title">Anonymous Functions &amp; Lambdas</h1>
+  <p class="slide-subtitle">Functions without names. You create them on the spot and pass them around like values &mdash; especially to other functions.</p>
+
+  <div class="analogy">
+    📋 <strong>Analogy:</strong> You hire a contractor with a specific skill for one job. You don&rsquo;t give them a permanent contract &mdash; they just do the task and leave. An anonymous function is that contractor: defined for one purpose, used immediately, not stored anywhere permanently.
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">📐</span> Syntax &amp; examples</p>
+    <div class="code-block"><span class="cmt">// Named function (has a name, stored permanently)</span>
+<span class="ty">int</span> <span class="fn">square</span>(<span class="ty">int</span> x) <span class="op">=></span> x <span class="op">*</span> x;
+
+<span class="cmt">// Anonymous function (no name, passed inline)</span>
+<span class="ty">List</span><span class="op">&lt;</span><span class="ty">int</span><span class="op">&gt;</span> nums <span class="op">=</span> [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>];
+
+<span class="cmt">// Passed to forEach — no name, used immediately</span>
+nums.<span class="fn">forEach</span>((<span class="ty">int</span> n) {
+  <span class="fn">print</span>(n <span class="op">*</span> n);
+});
+
+<span class="cmt">// Arrow shorthand — same thing, one line</span>
+nums.<span class="fn">forEach</span>((n) <span class="op">=></span> <span class="fn">print</span>(n <span class="op">*</span> n));
+
+<span class="cmt">// Stored in a variable (a "lambda")</span>
+<span class="kw">var</span> double <span class="op">=</span> (<span class="ty">int</span> x) <span class="op">=></span> x <span class="op">*</span> <span class="num">2</span>;
+<span class="fn">print</span>(double(<span class="num">7</span>)); <span class="cmt">// 14</span></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🔁</span> Where you&rsquo;ll see them everywhere</p>
+    <div class="code-block"><span class="ty">List</span><span class="op">&lt;</span><span class="ty">int</span><span class="op">&gt;</span> scores <span class="op">=</span> [<span class="num">72</span>, <span class="num">45</span>, <span class="num">88</span>, <span class="num">91</span>, <span class="num">60</span>];
+
+<span class="cmt">// .where() — filter: keep scores >= 70</span>
+<span class="kw">var</span> passing <span class="op">=</span> scores.<span class="fn">where</span>((s) <span class="op">=></span> s <span class="op">&gt;=</span> <span class="num">70</span>);
+<span class="fn">print</span>(passing.<span class="fn">toList</span>()); <span class="cmt">// [72, 88, 91]</span>
+
+<span class="cmt">// .map() — transform: double every score</span>
+<span class="kw">var</span> doubled <span class="op">=</span> scores.<span class="fn">map</span>((s) <span class="op">=></span> s <span class="op">*</span> <span class="num">2</span>);
+<span class="fn">print</span>(doubled.<span class="fn">toList</span>()); <span class="cmt">// [144, 90, 176, 182, 120]</span>
+
+<span class="cmt">// .reduce() — combine: sum all scores</span>
+<span class="ty">int</span> total <span class="op">=</span> scores.<span class="fn">reduce</span>((sum, s) <span class="op">=></span> sum <span class="op">+</span> s);
+<span class="fn">print</span>(total); <span class="cmt">// 356</span></div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 9 — Lambda Explorer ════════════════ -->
+<section class="slide" id="slide-9" aria-label="Slide 9: Lambda explorer">
+  <span class="slide-tag">🎮 Interactive <span class="slide-number">09</span></span>
+  <h1 class="slide-title">Lambda &amp; Arrow Explorer</h1>
+  <p class="slide-subtitle">Select any example to see the full function, its arrow equivalent, and a live result. See how much cleaner arrow syntax is.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🧪</span> Choose an example</p>
+    <div class="lambda-tabs" role="tablist" id="lambdaTabRow"></div>
+    <div class="grid-2" style="gap:12px;margin-top:4px;">
+      <div>
+        <p class="code-label">Standard function</p>
+        <div class="param-demo" id="lambdaFull" style="min-height:100px;font-size:.78rem;"></div>
+      </div>
+      <div>
+        <p class="code-label">Arrow / lambda version</p>
+        <div class="param-demo" id="lambdaArrow" style="min-height:100px;font-size:.78rem;border-left:3px solid var(--future-col);"></div>
+      </div>
+    </div>
+    <div class="param-explain" id="lambdaExplain" style="margin-top:10px;"></div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 10 — Why Async? ════════════════════ -->
+<section class="slide" id="slide-10" aria-label="Slide 10: Why async exists">
+  <span class="slide-tag">⏳ Async <span class="slide-number">10</span></span>
+  <h1 class="slide-title">Why Does Async Exist?</h1>
+  <p class="slide-subtitle">Before writing a single async keyword, understand the <em>problem it solves</em>.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🧊</span> The freezing problem</p>
+    <p style="font-size:.88rem;color:var(--text2);line-height:1.7;margin-bottom:12px;">
+      Imagine your app needs to load a user profile from a server. That request takes 2 seconds. If your code is <em>synchronous</em>, it waits &mdash; completely frozen &mdash; for those 2 seconds. The screen doesn&rsquo;t update. Buttons don&rsquo;t respond. The user thinks the app crashed.
+    </p>
+    <div class="code-block"><span class="cmt">// SYNCHRONOUS — everything freezes for 2 seconds</span>
+<span class="ty">String</span> profile <span class="op">=</span> <span class="fn">fetchUserFromServer</span>(); <span class="cmt">// ← blocks here</span>
+<span class="fn">print</span>(<span class="str">"Got profile: <span class="hi">$profile</span>"</span>);            <span class="cmt">// runs after 2s</span>
+<span class="fn">print</span>(<span class="str">"Updating UI..."</span>);                    <span class="cmt">// runs after 2s</span>
+<span class="cmt">// During those 2 seconds: the app is completely frozen</span></div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card">
+      <p class="card-title"><span class="card-icon">🚶</span> Synchronous</p>
+      <p style="font-size:.85rem;color:var(--text2);line-height:1.7;">Do <strong>Task A</strong>. Wait. When done, do <strong>Task B</strong>. Wait. When done, do <strong>Task C</strong>.<br><br>Like a restaurant where the waiter takes your order, <em>then walks to the kitchen and just stands there</em> until your food is ready.</p>
+    </div>
+    <div class="card">
+      <p class="card-title"><span class="card-icon">⚡</span> Asynchronous</p>
+      <p style="font-size:.85rem;color:var(--text2);line-height:1.7;">Start <strong>Task A</strong>. While waiting, do <strong>Task B</strong> and <strong>Task C</strong>. When A finishes, handle its result.<br><br>Like a waiter who takes your order, <em>gives it to the kitchen, then serves other tables</em> while your food cooks.</p>
+    </div>
+  </div>
+
+  <div class="analogy">
+    ☕ <strong>The real-world version:</strong> You put the kettle on. You don&rsquo;t stand frozen at the kettle. You make toast while the water boils. When the kettle beeps, you handle it. That&rsquo;s async &mdash; <em>start something slow, keep moving, handle it when it&rsquo;s done.</em>
+  </div>
+</section>
+
+<!-- ══ SLIDE 11 — Sync vs Async Visualised ══════ -->
+<section class="slide" id="slide-11" aria-label="Slide 11: Sync vs async visual">
+  <span class="slide-tag">⏳ Async <span class="slide-number">11</span></span>
+  <h1 class="slide-title">Sync vs Async &mdash; Visualised</h1>
+  <p class="slide-subtitle">See exactly when each task runs and when results arrive.</p>
+
+  <div class="grid-2">
+    <div class="card">
+      <p class="card-title"><span class="card-icon">🚶</span> Synchronous execution</p>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot sync"></div>
+          <div class="timeline-label">Start app <span class="timeline-badge badge-sync">sync</span></div>
+          <div class="timeline-desc">t = 0ms</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot sync"></div>
+          <div class="timeline-label">Call fetchUser() &mdash; <strong>BLOCKS</strong></div>
+          <div class="timeline-desc">t = 0ms &rarr; freezes</div>
+        </div>
+        <div class="timeline-item" style="opacity:.35;">
+          <div class="timeline-dot" style="background:var(--bg3)"></div>
+          <div class="timeline-label" style="text-decoration:line-through;">Update UI</div>
+          <div class="timeline-desc">waiting&hellip; can&rsquo;t run</div>
+        </div>
+        <div class="timeline-item" style="opacity:.35;">
+          <div class="timeline-dot" style="background:var(--bg3)"></div>
+          <div class="timeline-label" style="text-decoration:line-through;">Handle tap</div>
+          <div class="timeline-desc">waiting&hellip; can&rsquo;t run</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-label">fetchUser() returns</div>
+          <div class="timeline-desc">t = 2000ms &mdash; finally unblocks</div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <p class="card-title"><span class="card-icon">⚡</span> Asynchronous execution</p>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot sync"></div>
+          <div class="timeline-label">Start app</div>
+          <div class="timeline-desc">t = 0ms</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot async-d"></div>
+          <div class="timeline-label">Start fetchUser() <span class="timeline-badge badge-async">async</span></div>
+          <div class="timeline-desc">t = 0ms &rarr; returns a Future immediately</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-label">Update UI ✓</div>
+          <div class="timeline-desc">t = 5ms &mdash; runs freely</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-label">Handle tap ✓</div>
+          <div class="timeline-desc">t = 50ms &mdash; runs freely</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot done"></div>
+          <div class="timeline-label">fetchUser() result arrives <span class="timeline-badge badge-future">Future</span></div>
+          <div class="timeline-desc">t = 2000ms &mdash; .then() fires</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 12 — Introduction to Future ═══════ -->
+<section class="slide" id="slide-12" aria-label="Slide 12: Introduction to Future">
+  <span class="slide-tag">⏳ Async <span class="slide-number">12</span></span>
+  <h1 class="slide-title">Introduction to Future</h1>
+  <p class="slide-subtitle">A <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 8px;border-radius:4px;">Future</code> is Dart&rsquo;s way of representing a value that <em>doesn&rsquo;t exist yet</em> but will arrive later.</p>
+
+  <div class="analogy">
+    🎟️ <strong>A Future is a ticket stub.</strong> When you order food at a restaurant, you get a ticket. You don&rsquo;t have the food yet &mdash; you have a <em>promise</em> that it will arrive. You can go sit down, talk to friends, check your phone. When your number is called, you collect the food. The ticket is the Future; collecting the food is <code style="font-family:'Space Mono',monospace;">.then()</code>.
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">📐</span> Declaring and creating a Future</p>
+    <div class="code-block"><span class="cmt">// A function that returns a Future promises it will</span>
+<span class="cmt">// eventually give back a String</span>
+<span class="ty">Future</span><span class="op">&lt;</span><span class="ty">String</span><span class="op">&gt;</span> <span class="fn">fetchUsername</span>() {
+  <span class="kw">return</span> <span class="ty">Future</span>.<span class="fn">delayed</span>(
+    <span class="fn">Duration</span>(seconds: <span class="num">2</span>),      <span class="cmt">// simulate a 2s network call</span>
+    () <span class="op">=></span> <span class="str">"ayaan_dev"</span>,            <span class="cmt">// value that arrives after 2s</span>
+  );
+}
+
+<span class="cmt">// Three possible states a Future can be in:</span>
+<span class="cmt">// 1. Pending   — still waiting (request in flight)</span>
+<span class="cmt">// 2. Completed — succeeded, value available</span>
+<span class="cmt">// 3. Error     — failed (network down, server error, etc.)</span></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🔮</span> Future states visualised</p>
+    <div class="chain-wrap" role="img" aria-label="Future states diagram">
+      <div class="chain-box future-b">Future&lt;String&gt;<br><span style="font-size:.65rem;font-weight:400;">pending</span></div>
+      <div class="chain-arrow">&rarr;</div>
+      <div class="chain-box then-b">.then(value)<br><span style="font-size:.65rem;font-weight:400;">success path</span></div>
+      <div class="chain-arrow">|</div>
+      <div class="chain-box catch-b">.catchError(e)<br><span style="font-size:.65rem;font-weight:400;">error path</span></div>
+    </div>
+    <p style="font-size:.85rem;color:var(--text2);margin-top:8px;">
+      A Future travels exactly one of two paths: it either completes with a value (<code style="font-family:'Space Mono',monospace;">.then</code>) or fails with an error (<code style="font-family:'Space Mono',monospace;">.catchError</code>). It can never do both.
+    </p>
+  </div>
+</section>
+
+<!-- ══ SLIDE 13 — .then() and .catchError() ════ -->
+<section class="slide" id="slide-13" aria-label="Slide 13: then and catchError">
+  <span class="slide-tag">⏳ Async <span class="slide-number">13</span></span>
+  <h1 class="slide-title">.then() &amp; .catchError()</h1>
+  <p class="slide-subtitle">Two methods that let you react to a Future completing &mdash; one for success, one for failure.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">📐</span> Basic usage</p>
+    <div class="code-block"><span class="ty">Future</span><span class="op">&lt;</span><span class="ty">String</span><span class="op">&gt;</span> <span class="fn">fetchUser</span>() <span class="op">=></span>
+  <span class="ty">Future</span>.<span class="fn">delayed</span>(<span class="fn">Duration</span>(seconds: <span class="num">2</span>), () <span class="op">=></span> <span class="str">"Ayaan"</span>);
+
+<span class="cmt">// .then() — runs when the Future SUCCEEDS</span>
+<span class="fn">fetchUser</span>()
+  .<span class="fn">then</span>((username) {
+    <span class="fn">print</span>(<span class="str">"Welcome, <span class="hi">$username</span>!"</span>);   <span class="cmt">// Welcome, Ayaan!</span>
+  })
+  .<span class="fn">catchError</span>((error) {
+    <span class="fn">print</span>(<span class="str">"Failed: <span class="hi">$error</span>"</span>);         <span class="cmt">// if network fails</span>
+  });
+
+<span class="fn">print</span>(<span class="str">"This runs IMMEDIATELY"</span>); <span class="cmt">// prints first, before Welcome</span></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🔗</span> Chaining .then() calls</p>
+    <div class="code-block"><span class="cmt">// .then() returns another Future — so you can chain</span>
+<span class="fn">fetchUser</span>()
+  .<span class="fn">then</span>((username) {
+    <span class="fn">print</span>(<span class="str">"Got user: <span class="hi">$username</span>"</span>);
+    <span class="kw">return</span> <span class="fn">fetchUserScore</span>(username); <span class="cmt">// returns another Future</span>
+  })
+  .<span class="fn">then</span>((score) {
+    <span class="fn">print</span>(<span class="str">"Score: <span class="hi">$score</span>"</span>);           <span class="cmt">// runs after second Future</span>
+  })
+  .<span class="fn">catchError</span>((e) {
+    <span class="fn">print</span>(<span class="str">"Something went wrong: <span class="hi">$e</span>"</span>); <span class="cmt">// catches ANY error in chain</span>
+  })
+  .<span class="fn">whenComplete</span>(() {
+    <span class="fn">print</span>(<span class="str">"Done, success or fail"</span>);   <span class="cmt">// always runs</span>
+  });</div>
+    <div class="analogy" style="margin-top:12px;margin-bottom:0;">
+      🏭 <strong>Think of it as an assembly line.</strong> Each <code style="font-family:'Space Mono',monospace;">.then()</code> is a station that receives the output from the previous station and does something with it. If any station fails, the error skips straight to <code style="font-family:'Space Mono',monospace;">.catchError()</code>.
+    </div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 14 — Async Simulator ═══════════════ -->
+<section class="slide" id="slide-14" aria-label="Slide 14: Async simulator">
+  <span class="slide-tag">🎮 Interactive <span class="slide-number">14</span></span>
+  <h1 class="slide-title">Async Simulator</h1>
+  <p class="slide-subtitle">Watch async tasks run in parallel. Notice how synchronous tasks print immediately while the async task finishes later.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">▶</span> Simulate a real async flow</p>
+    <div class="code-block" style="font-size:.8rem;"><span class="fn">fetchUser</span>()        <span class="cmt">// async: takes 2 seconds</span>
+  .<span class="fn">then</span>((u) <span class="op">=></span> <span class="fn">print</span>(<span class="str">"User: <span class="hi">$u</span>"</span>))
+  .<span class="fn">catchError</span>((e) <span class="op">=></span> <span class="fn">print</span>(<span class="str">"Error!"</span>));
+<span class="fn">print</span>(<span class="str">"UI ready"</span>);        <span class="cmt">// sync: runs immediately</span>
+<span class="fn">print</span>(<span class="str">"Listening for taps"</span>); <span class="cmt">// sync: runs immediately</span></div>
+
+    <div class="sim-track" id="simTrack" role="list" aria-label="Async task simulation"></div>
+
+    <div style="margin-top:10px;">
+      <button class="sim-btn sim-btn-run" id="simRunBtn" onclick="runSim()" aria-label="Run simulation">&#9654; Run simulation</button>
+      <button class="sim-btn sim-btn-reset" onclick="resetSim()" aria-label="Reset simulation">&#8635; Reset</button>
+    </div>
+    <div class="sim-output" id="simOutput"><span style="color:#546e7a;font-style:italic;">// output will appear here&hellip;</span></div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🔴</span> What happens when it errors?</p>
+    <button class="run-btn" onclick="runSimError()" style="margin-bottom:12px;" aria-label="Run error simulation">&#9654; Simulate network error</button>
+    <div class="sim-output" id="simErrOutput"><span style="color:#546e7a;font-style:italic;">// click the button above&hellip;</span></div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 15 — Quiz ══════════════════════════ -->
+<section class="slide" id="slide-15" aria-label="Slide 15: Quiz">
+  <span class="slide-tag">🧩 Quiz <span class="slide-number">15</span></span>
+  <h1 class="slide-title">Check Your Understanding</h1>
+  <p class="slide-subtitle">Four questions &mdash; take your time!</p>
+
+  <div class="card" id="quiz1">
+    <p class="quiz-question">1. What is the arrow <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 6px;border-radius:4px;">=&gt;</code> version of this function?<br><code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:3px 10px;border-radius:6px;font-size:.85rem;display:inline-block;margin-top:6px;">bool isOdd(int n) { return n % 2 != 0; }</code></p>
+    <div class="quiz-options" role="group" aria-label="Question 1 options">
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz1')"><span class="quiz-option-letter">A</span><code style="font-family:'Space Mono',monospace;">bool isOdd(int n) => { n % 2 != 0; }</code></button>
+      <button class="quiz-option" onclick="answer(this,'correct','quiz1')"><span class="quiz-option-letter">B</span><code style="font-family:'Space Mono',monospace;">bool isOdd(int n) => n % 2 != 0;</code></button>
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz1')"><span class="quiz-option-letter">C</span><code style="font-family:'Space Mono',monospace;">bool => isOdd(int n) n % 2 != 0;</code></button>
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz1')"><span class="quiz-option-letter">D</span><code style="font-family:'Space Mono',monospace;">isOdd(int n) => bool n % 2 != 0;</code></button>
+    </div>
+    <div class="quiz-feedback" id="fb-quiz1" role="alert"></div>
+  </div>
+
+  <div class="card" id="quiz2">
+    <p class="quiz-question">2. You are writing a function <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 6px;border-radius:4px;">sendEmail</code> with parameters <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 6px;border-radius:4px;">to</code> (required) and <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 6px;border-radius:4px;">subject</code> (optional, default: &ldquo;No Subject&rdquo;). Which declaration is correct?</p>
+    <div class="quiz-options" role="group" aria-label="Question 2 options">
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz2')"><span class="quiz-option-letter">A</span><code style="font-family:'Space Mono',monospace;">void sendEmail(required String to, String subject)</code></button>
+      <button class="quiz-option" onclick="answer(this,'correct','quiz2')"><span class="quiz-option-letter">B</span><code style="font-family:'Space Mono',monospace;">void sendEmail({required String to, String subject = "No Subject"})</code></button>
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz2')"><span class="quiz-option-letter">C</span><code style="font-family:'Space Mono',monospace;">void sendEmail(String to, {String subject})</code></button>
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz2')"><span class="quiz-option-letter">D</span><code style="font-family:'Space Mono',monospace;">void sendEmail(required to, optional subject = "No Subject")</code></button>
+    </div>
+    <div class="quiz-feedback" id="fb-quiz2" role="alert"></div>
+  </div>
+
+  <div class="card" id="quiz3">
+    <p class="quiz-question">3. In a <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 6px;border-radius:4px;">.then()/.catchError()</code> chain, in what order do these three lines print?<br><code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:3px 10px;border-radius:6px;font-size:.82rem;display:inline-block;margin-top:6px;">fetchUser().then((u) =&gt; print("B")); print("A"); print("C");</code></p>
+    <div class="quiz-options" role="group" aria-label="Question 3 options">
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz3')"><span class="quiz-option-letter">A</span>B, A, C &mdash; Future runs first</button>
+      <button class="quiz-option" onclick="answer(this,'correct','quiz3')"><span class="quiz-option-letter">B</span>A, C, B &mdash; sync lines run immediately; Future result comes last</button>
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz3')"><span class="quiz-option-letter">C</span>A, B, C &mdash; they all run in order</button>
+      <button class="quiz-option" onclick="answer(this,'wrong','quiz3')"><span class="quiz-option-letter">D</span>It depends on the machine speed</button>
+    </div>
+    <div class="quiz-feedback" id="fb-quiz3" role="alert"></div>
+  </div>
+
+  <div class="card" id="quiz4">
+    <p class="quiz-question">4. Fill in the blank &mdash; complete the arrow function:</p>
+    <div class="code-block" style="font-size:.82rem;"><span class="ty">int</span> <span class="fn">square</span>(<span class="ty">int</span> x) <span id="fillSpan" style="color:#f78c6c;font-style:italic;">_____</span> x <span class="op">*</span> x;</div>
+    <div style="display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap;">
+      <span style="font-family:'Space Mono',monospace;font-size:.88rem;color:var(--text2);">Answer:</span>
+      <input type="text" class="fill-input" id="fillAnswer" placeholder="symbol" aria-label="Fill in the blank" maxlength="4" />
+      <button class="check-btn" onclick="checkFill()" aria-label="Check answer">Check</button>
+    </div>
+    <div class="quiz-feedback" id="fb-quiz4" role="alert"></div>
+  </div>
+</section>
+
+<!-- ══ SLIDE 16 — Summary ═══════════════════════ -->
+<section class="slide" id="slide-16" aria-label="Slide 16: Summary">
+  <span class="slide-tag">🏁 Summary <span class="slide-number">16</span></span>
+  <h1 class="slide-title">Class Recap</h1>
+  <p class="slide-subtitle">Everything we covered today in one place.</p>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">✅</span> Functions &amp; Async Toolkit</p>
+    <div class="summary-row">
+      <div class="summary-chip"><strong>returnType name()</strong><span>Define a function</span></div>
+      <div class="summary-chip"><strong>void</strong><span>Returns nothing</span></div>
+      <div class="summary-chip"><strong>positional params</strong><span>Order matters</span></div>
+      <div class="summary-chip"><strong>{ named: params }</strong><span>Order flexible</span></div>
+      <div class="summary-chip"><strong>required keyword</strong><span>Must be passed</span></div>
+      <div class="summary-chip"><strong>param = default</strong><span>Optional with fallback</span></div>
+      <div class="summary-chip"><strong>=&gt; expr</strong><span>Arrow: single expression</span></div>
+      <div class="summary-chip"><strong>(x) =&gt; x * 2</strong><span>Anonymous / lambda</span></div>
+      <div class="summary-chip"><strong>.where() .map()</strong><span>Lambdas on collections</span></div>
+      <div class="summary-chip"><strong>Future&lt;T&gt;</strong><span>Value arriving later</span></div>
+      <div class="summary-chip"><strong>.then()</strong><span>Handle success</span></div>
+      <div class="summary-chip"><strong>.catchError()</strong><span>Handle failure</span></div>
+      <div class="summary-chip"><strong>.whenComplete()</strong><span>Always runs</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title"><span class="card-icon">🔭</span> Everything together</p>
+    <div class="code-block"><span class="cmt">// A complete async workflow using everything from today</span>
+
+<span class="cmt">// Named params + arrow + Future</span>
+<span class="ty">Future</span><span class="op">&lt;</span><span class="ty">Map</span><span class="op">&lt;</span><span class="ty">String</span>, <span class="ty">dynamic</span><span class="op">&gt;&gt;</span> <span class="fn">loadProfile</span>({
+  <span class="kw">required</span> <span class="ty">String</span> userId,
+  <span class="ty">bool</span> includeScores <span class="op">=</span> <span class="kw">true</span>,
+}) <span class="op">=></span> <span class="ty">Future</span>.<span class="fn">delayed</span>(
+  <span class="fn">Duration</span>(seconds: <span class="num">1</span>),
+  () <span class="op">=></span> {
+    <span class="str">"name"</span>: <span class="str">"Ayaan"</span>,
+    <span class="str">"score"</span>: includeScores <span class="op">?</span> <span class="num">92</span> <span class="op">:</span> <span class="kw">null</span>,
+  },
+);
+
+<span class="cmt">// Call it — sync lines run immediately, .then() waits</span>
+<span class="fn">loadProfile</span>(userId: <span class="str">"u42"</span>)
+  .<span class="fn">then</span>((profile) {
+    <span class="ty">String</span> name   <span class="op">=</span> profile[<span class="str">"name"</span>] <span class="op">as</span> <span class="ty">String</span>;
+    <span class="ty">int?</span>   score  <span class="op">=</span> profile[<span class="str">"score"</span>] <span class="kw">as</span> <span class="ty">int?</span>;
+    <span class="fn">print</span>(<span class="str">"Loaded: <span class="hi">$name</span>, score=<span class="hi">$score</span>"</span>);
+
+    <span class="cmt">// Lambda on result data</span>
+    <span class="kw">var</span> tags <span class="op">=</span> [<span class="str">"flutter"</span>, <span class="str">"dart"</span>, <span class="str">"mobile"</span>];
+    <span class="kw">var</span> upper <span class="op">=</span> tags.<span class="fn">map</span>((t) <span class="op">=></span> t.<span class="fn">toUpperCase</span>()).<span class="fn">toList</span>();
+    <span class="fn">print</span>(upper);  <span class="cmt">// [FLUTTER, DART, MOBILE]</span>
+  })
+  .<span class="fn">catchError</span>((e) <span class="op">=></span> <span class="fn">print</span>(<span class="str">"Error: <span class="hi">$e</span>"</span>))
+  .<span class="fn">whenComplete</span>(() <span class="op">=></span> <span class="fn">print</span>(<span class="str">"Request complete"</span>));
+
+<span class="fn">print</span>(<span class="str">"App UI is live"</span>); <span class="cmt">// prints first!</span></div>
+  </div>
+
+  <div class="card" style="background:linear-gradient(135deg,var(--bg2) 0%,var(--bg3) 100%);">
+    <p class="card-title"><span class="card-icon">🎯</span> Practice Challenge</p>
+    <p style="font-size:.9rem;color:var(--text2);line-height:1.8;">
+      Write a function <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">filterAndFormat</code> that takes a <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">List&lt;int&gt;</code> of scores, a required named <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">int minScore</code>, and an optional named <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">String prefix = "Score:"</code>. Use <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">.where()</code> with a lambda to filter, then <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">.map()</code> to format each score as <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">"Score: 88"</code>. Return the result as a <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">List&lt;String&gt;</code>. Then wrap the whole thing in a <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">Future</code> and handle it with <code style="font-family:'Space Mono',monospace;background:var(--bg3);padding:2px 5px;border-radius:3px;">.then()</code>.
+    </p>
+  </div>
+</section>
+
+<!-- NAV -->
+<nav class="nav-row" aria-label="Slide navigation">
+  <button class="nav-btn nav-btn-prev" id="prevBtn" onclick="changeSlide(-1)" disabled aria-label="Previous slide">&larr; Prev</button>
+  <div class="slide-dots" id="dotContainer" role="tablist" aria-label="Slide dots"></div>
+  <button class="nav-btn nav-btn-next" id="nextBtn" onclick="changeSlide(1)" aria-label="Next slide">Next &rarr;</button>
+</nav>
+</main>
+
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+/* ── Navigation ──────────────────────────────── */
+const TOTAL = 16;
+let current = 1;
+
+const themeBtn = document.getElementById("themeBtn");
+const savedTheme = localStorage.getItem("theme") || "light";
+document.documentElement.setAttribute("data-theme", savedTheme);
+themeBtn.textContent = savedTheme === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+themeBtn.addEventListener("click", function() {
+  const next = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+  document.documentElement.setAttribute("data-theme", next);
+  themeBtn.textContent = next === "dark" ? "\u2600\uFE0F" : "\uD83C\uDF19";
+  localStorage.setItem("theme", next);
+});
+
+const dotContainer = document.getElementById("dotContainer");
+for (let i = 1; i <= TOTAL; i++) {
+  const d = document.createElement("button");
+  d.className = "dot" + (i === 1 ? " active" : "");
+  d.setAttribute("role", "tab");
+  d.setAttribute("aria-label", "Go to slide " + i);
+  d.setAttribute("aria-selected", i === 1 ? "true" : "false");
+  d.onclick = (function(n){ return function(){ goTo(n); }; })(i);
+  dotContainer.appendChild(d);
+}
+
+function goTo(n) {
+  document.getElementById("slide-" + current).classList.remove("active");
+  dotContainer.children[current - 1].classList.remove("active");
+  dotContainer.children[current - 1].setAttribute("aria-selected", "false");
+  current = n;
+  const slide = document.getElementById("slide-" + current);
+  slide.classList.add("active");
+  slide.tabIndex = -1; slide.focus();
+  dotContainer.children[current - 1].classList.add("active");
+  dotContainer.children[current - 1].setAttribute("aria-selected", "true");
+  document.getElementById("prevBtn").disabled = current === 1;
+  document.getElementById("nextBtn").disabled = current === TOTAL;
+  const pct = ((current / TOTAL) * 100).toFixed(1);
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressText").textContent = current + " / " + TOTAL;
+  document.querySelector(".progress-bar").setAttribute("aria-valuenow", current);
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+function changeSlide(dir) { goTo(current + dir); }
+document.addEventListener("keydown", function(e) {
+  if (e.target.tagName === "INPUT") return;
+  if (e.key === "ArrowRight" && current < TOTAL) changeSlide(1);
+  if (e.key === "ArrowLeft"  && current > 1)     changeSlide(-1);
+});
+
+/* ── Code helpers ────────────────────────────── */
+function kw(s)  { return "<span class=\"kw\">"  + s + "</span>"; }
+function ty(s)  { return "<span class=\"ty\">"  + s + "</span>"; }
+function str(s) { return "<span class=\"str\">" + s + "</span>"; }
+function num(s) { return "<span class=\"num\">" + s + "</span>"; }
+function cmt(s) { return "<span class=\"cmt\">" + s + "</span>"; }
+function fn(s)  { return "<span class=\"fn\">"  + s + "</span>"; }
+function op(s)  { return "<span class=\"op\">"  + s + "</span>"; }
+function hi(s)  { return "<span class=\"hi\">"  + s + "</span>"; }
+
+/* ── Slide 4: Parameter types ────────────────── */
+const PARAMS = [
+  {
+    label: "Positional",
+    code:
+      cmt("// Position matters — args passed by ORDER") + "\n" +
+      ty("String") + " " + fn("formatName") + "(" + ty("String") + " first, " + ty("String") + " last) {\n" +
+      "  " + kw("return") + " " + str("\"$first $last\"") + ";\n" +
+      "}\n\n" +
+      cmt("// Must pass in exact order: first, then last") + "\n" +
+      fn("print") + "(" + fn("formatName") + "(" + str("\"Ayaan\"") + ", " + str("\"Khan\"") + "));\n" +
+      cmt("// Ayaan Khan\n\n") +
+      cmt("// Can NOT skip or reorder:") + "\n" +
+      cmt("// formatName(last: \"Khan\", first: \"Ayaan\"); \u274C error"),
+    explain: "<strong>Positional parameters</strong> are matched by their position in the call. The first argument maps to the first parameter, second to second, and so on. Simple and fast, but callers must remember the order."
+  },
+  {
+    label: "Named",
+    code:
+      cmt("// Names matter \u2014 args passed by LABEL") + "\n" +
+      ty("String") + " " + fn("formatName") + "({" + ty("String") + " first " + op("=") + " " + str("\"\"") + ", " + ty("String") + " last " + op("=") + " " + str("\"\"") + "}) {\n" +
+      "  " + kw("return") + " " + str("\"$first $last\"") + ";\n" +
+      "}\n\n" +
+      cmt("// Curly braces { } wrap named params") + "\n" +
+      cmt("// Order does NOT matter at the call site") + "\n" +
+      fn("print") + "(" + fn("formatName") + "(first: " + str("\"Ayaan\"") + ", last: " + str("\"Khan\"") + "));\n" +
+      fn("print") + "(" + fn("formatName") + "(last: " + str("\"Khan\"") + ", first: " + str("\"Ayaan\"") + "));\n" +
+      cmt("// Both print: Ayaan Khan"),
+    explain: "<strong>Named parameters</strong> use labels at the call site, making code self-documenting. Order is flexible. They are declared inside <code style=\"font-family:'Space Mono',monospace;\">{ }</code>. Flutter uses named parameters everywhere for widget properties."
+  },
+  {
+    label: "Optional positional",
+    code:
+      cmt("// Square brackets [ ] = optional positional") + "\n" +
+      ty("String") + " " + fn("greet") + "(" + ty("String") + " name, [" + ty("String") + " title " + op("=") + " " + str("\"\"") + "]) {\n" +
+      "  " + kw("return") + " title.isEmpty\n" +
+      "    ? " + str("\"Hello, $name!\"") + "\n" +
+      "    : " + str("\"Hello, $title $name!\"") + ";\n" +
+      "}\n\n" +
+      fn("print") + "(" + fn("greet") + "(" + str("\"Sara\"") + "));             " + cmt("// Hello, Sara!") + "\n" +
+      fn("print") + "(" + fn("greet") + "(" + str("\"Sara\"") + ", " + str("\"Dr.\"") + "));    " + cmt("// Hello, Dr. Sara!"),
+    explain: "<strong>Optional positional parameters</strong> use <code style=\"font-family:'Space Mono',monospace;\">[ ]</code>. They are positional (order matters) but the caller can omit them. A default value is used when omitted. Less common than named optional params."
+  },
+  {
+    label: "Default values",
+    code:
+      cmt("// Default values apply when argument is omitted") + "\n\n" +
+      kw("void") + " " + fn("sendNotif") + "({\n" +
+      "  " + kw("required") + " " + ty("String") + " message,\n" +
+      "  " + ty("String") + "  channel  " + op("=") + " " + str("\"general\"") + ",\n" +
+      "  " + ty("bool") + "    silent   " + op("=") + " " + kw("false") + ",\n" +
+      "  " + ty("int") + "     priority " + op("=") + " " + num("3") + ",\n" +
+      "}) {\n" +
+      "  " + fn("print") + "(" + str("\"[$channel] $message (priority $priority)\"") + ");\n" +
+      "}\n\n" +
+      fn("sendNotif") + "(message: " + str("\"Server down!\"") + ");\n" +
+      cmt("// [general] Server down! (priority 3)") + "\n\n" +
+      fn("sendNotif") + "(message: " + str("\"New post\"") + ", channel: " + str("\"posts\"") + ", priority: " + num("1") + ");\n" +
+      cmt("// [posts] New post (priority 1)"),
+    explain: "Default values let you define the most common case, while allowing callers to override only what they need. Combine with <code style=\"font-family:'Space Mono',monospace;\">required</code> to mark which params are truly mandatory vs. which are just customisation options."
+  }
+];
+
+function showParam(idx, btn) {
+  document.querySelectorAll(".param-tab").forEach(function(t, i) {
+    t.classList.toggle("active", i === idx);
+    t.setAttribute("aria-selected", i === idx ? "true" : "false");
+  });
+  const p = PARAMS[idx];
+  const demo = document.getElementById("paramDemo");
+  demo.style.opacity = "0";
+  setTimeout(function() {
+    demo.innerHTML = p.code;
+    demo.style.opacity = "1";
+    document.getElementById("paramExplain").innerHTML = p.explain;
+  }, 100);
+}
+showParam(0, document.querySelector(".param-tab"));
+
+/* ── Slide 6: Parameter Playground ──────────── */
+function runProfile() {
+  const name     = document.getElementById("pName").value.trim() || "Ayaan";
+  const age      = parseInt(document.getElementById("pAge").value) || 22;
+  const city     = document.getElementById("pCity").value.trim() || "Unknown";
+  const premium  = document.getElementById("pPremium").checked;
+  const status   = premium ? "Premium \u2B50" : "Standard";
+
+  const out = document.getElementById("callOutput");
+  out.innerHTML =
+    fn("buildProfile") + "(\n" +
+    "  name: " + str("\"" + name + "\"") + ",\n" +
+    "  age: " + num(age) + ",\n" +
+    (city !== "Unknown" ? "  city: " + str("\"" + city + "\"") + ",\n" : "") +
+    (premium ? "  isPremium: " + kw("true") + ",\n" : "") +
+    ");\n\n" +
+    cmt("// Output:") + "\n" +
+    "<span style=\"color:#c3e88d;\">\u25B6 Name: " + name + " | Age: " + age + " | City: " + city + " | " + status + "</span>";
+}
+
+document.querySelectorAll(".param-input").forEach(function(inp) {
+  inp.addEventListener("keydown", function(e) { if (e.key === "Enter") runProfile(); });
+});
+document.getElementById("pPremium").addEventListener("change", function() {
+  if (document.getElementById("pName").value) runProfile();
+});
+
+/* ── Slide 9: Lambda Explorer ────────────────── */
+const LAMBDAS = [
+  {
+    label: "double()",
+    full:
+      ty("int") + " " + fn("doubleVal") + "(" + ty("int") + " x) {\n" +
+      "  " + kw("return") + " x " + op("*") + " " + num("2") + ";\n" +
+      "}\n\n" +
+      fn("print") + "(" + fn("doubleVal") + "(" + num("6") + ")); " + cmt("// 12"),
+    arrow:
+      ty("int") + " " + fn("doubleVal") + "(" + ty("int") + " x)\n" +
+      "  " + op("=>") + " x " + op("*") + " " + num("2") + ";\n\n" +
+      fn("print") + "(" + fn("doubleVal") + "(" + num("6") + ")); " + cmt("// 12"),
+    explain: "The body is a single expression <code style=\"font-family:'Space Mono',monospace;\">x * 2</code>, so we replace <code style=\"font-family:'Space Mono',monospace;\">{ return x * 2; }</code> with <code style=\"font-family:'Space Mono',monospace;\">=> x * 2</code>. One line, same result."
+  },
+  {
+    label: ".where() lambda",
+    full:
+      ty("List") + op("<") + ty("int") + op(">") + " scores " + op("=") + " [" + num("44") + ", " + num("78") + ", " + num("91") + ", " + num("60") + ", " + num("85") + "];\n\n" +
+      cmt("// Named function approach") + "\n" +
+      kw("bool") + " " + fn("isPassing") + "(" + ty("int") + " s) {\n" +
+      "  " + kw("return") + " s " + op(">=") + " " + num("70") + ";\n" +
+      "}\n" +
+      kw("var") + " passing " + op("=") + " scores." + fn("where") + "(" + fn("isPassing") + ")." + fn("toList") + "();\n" +
+      fn("print") + "(passing); " + cmt("// [78, 91, 85]"),
+    arrow:
+      ty("List") + op("<") + ty("int") + op(">") + " scores " + op("=") + " [" + num("44") + ", " + num("78") + ", " + num("91") + ", " + num("60") + ", " + num("85") + "];\n\n" +
+      cmt("// Inline lambda \u2014 no named function needed") + "\n" +
+      kw("var") + " passing " + op("=") + " scores\n" +
+      "  ." + fn("where") + "((s) " + op("=>") + " s " + op(">=") + " " + num("70") + ")\n" +
+      "  ." + fn("toList") + "();\n\n" +
+      fn("print") + "(passing); " + cmt("// [78, 91, 85]"),
+    explain: "The lambda <code style=\"font-family:'Space Mono',monospace;\">(s) => s >= 70</code> replaces an entire named function. You don\u2019t need to name a function that\u2019s only used once in this context."
+  },
+  {
+    label: ".map() lambda",
+    full:
+      ty("List") + op("<") + ty("String") + op(">") + " names " + op("=") + " [" + str("\"ayaan\"") + ", " + str("\"sara\"") + ", " + str("\"rafi\"") + "];\n\n" +
+      ty("String") + " " + fn("capitalise") + "(" + ty("String") + " s) {\n" +
+      "  " + kw("return") + " s[" + num("0") + "]." + fn("toUpperCase") + "() + s." + fn("substring") + "(" + num("1") + ");\n" +
+      "}\n" +
+      kw("var") + " caps " + op("=") + " names." + fn("map") + "(" + fn("capitalise") + ")." + fn("toList") + "();\n" +
+      fn("print") + "(caps); " + cmt("// [Ayaan, Sara, Rafi]"),
+    arrow:
+      ty("List") + op("<") + ty("String") + op(">") + " names " + op("=") + " [" + str("\"ayaan\"") + ", " + str("\"sara\"") + ", " + str("\"rafi\"") + "];\n\n" +
+      kw("var") + " caps " + op("=") + " names\n" +
+      "  ." + fn("map") + "((s) " + op("=>") + " s[" + num("0") + "]." + fn("toUpperCase") + "() + s." + fn("substring") + "(" + num("1") + "))\n" +
+      "  ." + fn("toList") + "();\n\n" +
+      fn("print") + "(caps); " + cmt("// [Ayaan, Sara, Rafi]"),
+    explain: "The entire capitalise logic fits in one expression, so it becomes an inline lambda. This is idiomatic Dart \u2014 you\u2019ll see this pattern constantly in real Flutter codebases."
+  },
+  {
+    label: "Stored lambda",
+    full:
+      cmt("// A function you plan to reuse, stored as a variable") + "\n" +
+      ty("bool") + " " + fn("isLong") + "(" + ty("String") + " s) {\n" +
+      "  " + kw("return") + " s.length " + op(">") + " " + num("5") + ";\n" +
+      "}\n\n" +
+      ty("List") + op("<") + ty("String") + op(">") + " words " + op("=") + " [" + str("\"hi\"") + ", " + str("\"flutter\"") + ", " + str("\"dart\"") + ", " + str("\"mobile\"") + "];\n" +
+      fn("print") + "(words." + fn("where") + "(" + fn("isLong") + ")." + fn("toList") + "()); " + cmt("// [flutter, mobile]"),
+    arrow:
+      cmt("// Arrow lambda stored in a variable") + "\n" +
+      kw("var") + " isLong " + op("=") + " (" + ty("String") + " s) " + op("=>") + " s.length " + op(">") + " " + num("5") + ";\n\n" +
+      ty("List") + op("<") + ty("String") + op(">") + " words " + op("=") + " [" + str("\"hi\"") + ", " + str("\"flutter\"") + ", " + str("\"dart\"") + ", " + str("\"mobile\"") + "];\n" +
+      fn("print") + "(words." + fn("where") + "(isLong)." + fn("toList") + "()); " + cmt("// [flutter, mobile]"),
+    explain: "Lambdas can be stored in variables, making them reusable just like named functions. The difference: a named function is a declaration; a stored lambda is a value assigned to a variable. Both work as callbacks."
+  }
+];
+
+(function buildLambdaTabs() {
+  const row = document.getElementById("lambdaTabRow");
+  LAMBDAS.forEach(function(l, i) {
+    const btn = document.createElement("button");
+    btn.className = "lambda-tab" + (i === 0 ? " active" : "");
+    btn.textContent = l.label;
+    btn.setAttribute("role", "tab");
+    btn.setAttribute("aria-selected", i === 0 ? "true" : "false");
+    btn.onclick = (function(idx, b){ return function(){ showLambda(idx, b); }; })(i, btn);
+    row.appendChild(btn);
+  });
+  showLambda(0, row.children[0]);
+})();
+
+function showLambda(idx, btn) {
+  document.querySelectorAll(".lambda-tab").forEach(function(t, i) {
+    t.classList.toggle("active", i === idx);
+    t.setAttribute("aria-selected", i === idx ? "true" : "false");
+  });
+  const l = LAMBDAS[idx];
+  const full  = document.getElementById("lambdaFull");
+  const arrow = document.getElementById("lambdaArrow");
+  full.style.opacity = "0"; arrow.style.opacity = "0";
+  setTimeout(function() {
+    full.innerHTML  = l.full;
+    arrow.innerHTML = l.arrow;
+    document.getElementById("lambdaExplain").innerHTML = l.explain;
+    full.style.opacity = "1"; arrow.style.opacity = "1";
+  }, 100);
+}
+
+/* ── Slide 14: Async Simulator ───────────────── */
+const SIM_STEPS = [
+  { id: "t1", label: "print(\"UI ready\")",          time: 0,    type: "sync",  out: "\u25B6 UI ready" },
+  { id: "t2", label: "print(\"Listening for taps\")",time: 20,   type: "sync",  out: "\u25B6 Listening for taps" },
+  { id: "t3", label: "fetchUser() \u2014 network request", time: 0, type: "async", out: null },
+  { id: "t4", label: ".then() fires \u2014 User: Ayaan", time: 2000, type: "future", out: "\u25B6 User: Ayaan" },
+];
+
+function buildSimTrack() {
+  const track = document.getElementById("simTrack");
+  track.innerHTML = "";
+  SIM_STEPS.forEach(function(s) {
+    const div = document.createElement("div");
+    div.className = "sim-task waiting";
+    div.id = "sim-" + s.id;
+    div.setAttribute("role", "listitem");
+    const badgeCol = s.type === "sync" ? "background:#ddeeff;color:#1a4eb0;"
+      : s.type === "async" ? "background:var(--async-bg);color:var(--async-col);"
+      : "background:var(--correct);color:var(--future-col);";
+    div.innerHTML =
+      "<div class=\"sim-dot\"></div>" +
+      "<span class=\"sim-label\">" + s.label + "</span>" +
+      "<span class=\"sim-badge\" style=\"" + badgeCol + "\">" + s.type + "</span>";
+    track.appendChild(div);
+  });
+}
+
+let simRunning = false;
+
+function runSim() {
+  if (simRunning) return;
+  simRunning = true;
+  document.getElementById("simRunBtn").disabled = true;
+  const out = document.getElementById("simOutput");
+  out.innerHTML = "";
+  buildSimTrack();
+
+  SIM_STEPS.forEach(function(s) {
+    setTimeout(function() {
+      const el = document.getElementById("sim-" + s.id);
+      el.className = "sim-task running";
+      setTimeout(function() {
+        el.className = "sim-task done";
+        if (s.out) {
+          out.innerHTML += "<span style=\"color:#c3e88d;\">" + s.out + "</span>\n";
+        }
+      }, s.type === "async" ? 100 : 300);
+    }, s.time);
+  });
+
+  setTimeout(function() {
+    simRunning = false;
+    document.getElementById("simRunBtn").disabled = false;
+  }, 2600);
+}
+
+function resetSim() {
+  simRunning = false;
+  document.getElementById("simRunBtn").disabled = false;
+  buildSimTrack();
+  document.querySelectorAll(".sim-task").forEach(function(t) { t.className = "sim-task waiting"; });
+  document.getElementById("simOutput").innerHTML = "<span style=\"color:#546e7a;font-style:italic;\">// output will appear here\u2026</span>";
+}
+
+buildSimTrack();
+
+function runSimError() {
+  const out = document.getElementById("simErrOutput");
+  out.innerHTML = cmt("// Simulating: server returns 500 error\u2026") + "\n";
+  setTimeout(function() {
+    out.innerHTML +=
+      "<span style=\"color:#f07030;\">fetchUser()\n" +
+      "  .then((u) =&gt; print(\"User: $u\"))    // \u274C skipped\n" +
+      "  .catchError((e) =&gt; print(\"Error!\")) // \u2705 runs\n" +
+      "  .whenComplete(() =&gt; print(\"Done\"));  // \u2705 always runs\n\n</span>" +
+      "<span style=\"color:#c3e88d;\">\u25B6 Error!\n\u25B6 Done</span>";
+  }, 800);
+}
+
+/* ── Quiz ────────────────────────────────────── */
+function answer(btn, result, quizId) {
+  const card = document.getElementById(quizId);
+  card.querySelectorAll(".quiz-option").forEach(function(o) {
+    o.classList.add("disabled");
+    o.setAttribute("aria-disabled", "true");
+  });
+  const fb = document.getElementById("fb-" + quizId);
+  if (result === "correct") {
+    btn.classList.add("correct");
+    fb.className = "quiz-feedback show good";
+    if (quizId === "quiz1") fb.textContent = "\u2705 Correct! Arrow syntax replaces { return expr; } with => expr. The curly braces and return keyword are removed \u2014 the expression itself is the return value.";
+    if (quizId === "quiz2") fb.textContent = "\u2705 Correct! Named params use { }, required marks mandatory ones, and default values use = inside the braces. This is the most common pattern in Flutter widgets.";
+    if (quizId === "quiz3") fb.textContent = "\u2705 Correct! Sync lines print immediately (A then C). The .then() callback only fires after the Future completes \u2014 so B prints last, even though it was written first.";
+  } else {
+    btn.classList.add("wrong");
+    fb.className = "quiz-feedback show bad";
+    if (quizId === "quiz1") fb.textContent = "\u274C Not quite. Arrow syntax is: returnType name(params) => expression; No curly braces, no return keyword. The expression after => is automatically returned.";
+    if (quizId === "quiz2") fb.textContent = "\u274C Not quite. Named params go inside { }. The required keyword must be inside the braces too. Default values use = after the type and name, also inside the braces.";
+    if (quizId === "quiz3") fb.textContent = "\u274C Not quite. A and C are synchronous \u2014 they execute immediately on the current call stack. The .then() callback is scheduled to run after the Future completes, so B always comes last.";
+  }
+}
+
+function checkFill() {
+  const inp = document.getElementById("fillAnswer");
+  const ans = inp.value.trim();
+  const fb  = document.getElementById("fb-quiz4");
+  if (ans === "=>" || ans === "=>") {
+    inp.classList.add("correct"); inp.classList.remove("wrong");
+    fb.textContent = "\u2705 Correct! The => arrow operator replaces { return ...; } for single-expression function bodies.";
+    fb.className = "quiz-feedback show good";
+    document.getElementById("fillSpan").textContent = "=>";
+    document.getElementById("fillSpan").style.color = "#c3e88d";
+    document.getElementById("fillSpan").style.fontStyle = "normal";
+  } else {
+    inp.classList.add("wrong"); inp.classList.remove("correct");
+    fb.textContent = "\u274C The answer is => (the arrow operator). It signals that the function body is a single expression that will be returned directly.";
+    fb.className = "quiz-feedback show bad";
+  }
+}
+document.getElementById("fillAnswer").addEventListener("keydown", function(e) {
+  if (e.key === "Enter") checkFill();
+});
+</script>
+</body>
+</html>

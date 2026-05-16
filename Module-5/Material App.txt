@@ -1,0 +1,105 @@
+=> Basic Tameplate 
+
+
+=> In Material App
+
+1/ 'Routes'
+
+i) routes কী?
+
+MaterialApp(
+  routes: <String, WidgetBuilder>{ ... }
+)
+
+routes হলো একটা Map (Dictionary)
+Key → Screen এর নাম (String) — যেমন '/', '/about'
+Value → সেই screen এর Widget (WidgetBuilder)
+
+সহজ ভাষায়: "এই নামে গেলে এই screen দেখাও"
+
+ii) '/' — Home Route
+
+'/': (BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('Home Route'),
+    ),
+  );
+},
+
+'/' মানে প্রথম screen (app খুললেই যেটা দেখা যায়)
+এখানে একটা Scaffold return করছে যেটায় AppBar আছে
+
+iii) '/about' — About Route
+
+'/about': (BuildContext context) {
+  return Scaffold(
+    appBar: AppBar(
+      title: const Text('About Route'),
+    ),
+  );
+}
+
+'/about' মানে দ্বিতীয় screen
+এই screen এ যেতে হলে কোড থেকে call করতে হবে
+
+iV) এক screen থেকে আরেক screen এ কীভাবে যাবে?
+
+// '/about' screen এ যেতে:
+Navigator.pushNamed(context, '/about');
+
+// আগের screen এ ফিরে যেতে:
+Navigator.pop(context);
+
+v) পুরো ছবিটা এভাবে দেখো
+App চালু হলো
+      ↓
+   '/'  →  Home Screen দেখাও
+      ↓
+  Button চাপলে
+      ↓
+'/about' →  About Screen দেখাও
+      ↓
+  Back চাপলে
+      ↓
+   '/'  →  আবার Home Screen
+
+vi) Real Example — Button দিয়ে navigate করো
+
+MaterialApp(
+  routes: {
+    '/': (context) => Scaffold(
+      appBar: AppBar(title: Text('Home')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () {
+            Navigator.pushNamed(context, '/about'); // about এ যাও
+          },
+          child: Text('About Page এ যাও'),
+        ),
+      ),
+    ),
+    '/about': (context) => Scaffold(
+      appBar: AppBar(title: Text('About')),
+      body: Center(child: Text('এটা About Page!')),
+    ),
+  },
+)
+
+সংক্ষেপে
+ routes                          সব screen এর তালিকা
+ '/'                             প্রথম/home screen
+ '/about'                        যেকোনো নামের screen
+ Navigator.pushNamed()           নতুন screen এ যাও
+ Navigator.pop()                 আগের screen এ ফিরে যাও
+
+2/ theme
+
+i) Code:
+
+MaterialApp(
+  theme: ThemeData(
+    brightness: Brightness.dark,
+    primaryColor: Colors.blueGrey
+  ),
+)

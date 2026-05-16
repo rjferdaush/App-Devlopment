@@ -1,0 +1,341 @@
+
+╔══════════════════════════════════════════════════════════════╗
+║           Flutter — MaterialApp সম্পূর্ণ নোট                ║
+╚══════════════════════════════════════════════════════════════╝
+
+MaterialApp হলো Flutter এর সবচেয়ে বড় Root Widget।
+পুরো app এর ডিজাইন, navigation, ভাষা সব কিছু এখান থেকে control হয়।
+
+──────────────────────────────────────────────────────────────
+PART 1 — Basic Properties (সবচেয়ে বেশি ব্যবহার হয়)
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  title: 'আমার App',
+  home: MyHomePage(),
+  debugShowCheckedModeBanner: false,
+)
+
+► title:
+   - App এর নাম।
+   - Android এ task switcher এ (recent apps) এই নাম দেখা যায়।
+   - উদাহরণ: title: 'Shopping App'
+
+► home:
+   - App চালু হলে সবার আগে যে screen দেখাবে।
+   - যেকোনো Widget দেওয়া যায়, তবে সাধারণত Scaffold দেওয়া হয়।
+   - উদাহরণ: home: HomeScreen()
+   - ⚠️ মনে রাখো: home এবং routes একসাথে ব্যবহার করলে
+               home এর জন্য routes এ '/' দেওয়া যাবে না।
+
+► debugShowCheckedModeBanner:
+   - Debug mode এ screen এর উপরে "DEBUG" লেখা একটা লাল banner দেখায়।
+   - false দিলে সেটা সরে যায়।
+   - উদাহরণ: debugShowCheckedModeBanner: false
+   - Default value: true
+
+
+──────────────────────────────────────────────────────────────
+PART 2 — Theme (রং ও ডিজাইন)
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  theme: ThemeData(
+    primaryColor: Colors.blue,
+    scaffoldBackgroundColor: Colors.white,
+    colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
+    appBarTheme: AppBarTheme(
+      backgroundColor: Colors.blue,
+      foregroundColor: Colors.white,
+    ),
+    textTheme: TextTheme(
+      bodyLarge: TextStyle(fontSize: 18),
+      titleLarge: TextStyle(fontWeight: FontWeight.bold),
+    ),
+    elevatedButtonTheme: ElevatedButtonThemeData(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.green,
+      ),
+    ),
+    useMaterial3: true,
+  ),
+  darkTheme: ThemeData.dark(),
+  themeMode: ThemeMode.system,
+)
+
+► theme:
+   - Light mode এ app কেমন দেখাবে সেটা ঠিক করে।
+   - primaryColor    → AppBar, Button এর মূল রং
+   - scaffoldBackgroundColor → পুরো screen এর background রং
+   - colorScheme     → পুরো app জুড়ে color ছড়ানোর আধুনিক পদ্ধতি
+   - appBarTheme     → AppBar আলাদাভাবে সাজানো যায়
+   - textTheme       → সব Text এর default style
+   - elevatedButtonTheme → সব ElevatedButton এর default style
+   - useMaterial3    → true দিলে নতুন Material Design 3 চালু হয়
+
+► darkTheme:
+   - Dark mode এ app কেমন দেখাবে।
+   - ThemeData.dark() দিলে Flutter এর default dark theme আসে।
+   - নিজের মতো customize ও করা যায়।
+   - উদাহরণ: darkTheme: ThemeData(brightness: Brightness.dark)
+
+► themeMode:
+   - কোন theme ব্যবহার হবে সেটা ঠিক করে।
+   - ThemeMode.system  → ফোনের setting অনুযায়ী (auto)
+   - ThemeMode.light   → সবসময় light mode
+   - ThemeMode.dark    → সবসময় dark mode
+
+
+──────────────────────────────────────────────────────────────
+PART 3 — Routes / Navigation (Screen পরিবর্তন)
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  initialRoute: '/',
+  routes: {
+    '/': (context) => HomeScreen(),
+    '/about': (context) => AboutScreen(),
+    '/profile': (context) => ProfileScreen(),
+    '/settings': (context) => SettingsScreen(),
+  },
+)
+
+► initialRoute:
+   - App চালু হলে সবার প্রথমে কোন route দেখাবে।
+   - home এর বদলে routes ব্যবহার করলে এটা লিখতে হয়।
+   - উদাহরণ: initialRoute: '/'
+
+► routes:
+   - একটা Map যেখানে screen এর নাম ও সেই screen এর Widget থাকে।
+   - Key   → String (screen এর নাম, '/' দিয়ে শুরু)
+   - Value → WidgetBuilder (সেই screen এর Widget)
+   - '/'   → Home screen (প্রথম screen)
+
+   ► এক screen থেকে অন্য screen এ যেতে:
+     Navigator.pushNamed(context, '/about');
+
+   ► আগের screen এ ফিরে যেতে:
+     Navigator.pop(context);
+
+
+──────────────────────────────────────────────────────────────
+PART 4 — onGenerateRoute (Dynamic / Advanced Navigation)
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  onGenerateRoute: (RouteSettings settings) {
+    if (settings.name == '/profile') {
+      final String userId = settings.arguments as String;
+      return MaterialPageRoute(
+        builder: (context) => ProfileScreen(id: userId),
+      );
+    }
+    if (settings.name == '/product') {
+      final Map data = settings.arguments as Map;
+      return MaterialPageRoute(
+        builder: (context) => ProductScreen(data: data),
+      );
+    }
+    return null;
+  },
+)
+
+► onGenerateRoute:
+   - routes এর চেয়ে বেশি powerful।
+   - Screen এ data পাঠানো যায়।
+   - RouteSettings এ screen এর নাম ও argument থাকে।
+
+   ► কীভাবে এই route এ যাবে ও data পাঠাবে:
+     Navigator.pushNamed(
+       context,
+       '/profile',
+       arguments: 'user_123',  // এই data চলে যাবে
+     );
+
+
+──────────────────────────────────────────────────────────────
+PART 5 — onUnknownRoute (404 Page)
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  onUnknownRoute: (RouteSettings settings) {
+    return MaterialPageRoute(
+      builder: (context) => Scaffold(
+        appBar: AppBar(title: Text('Page Not Found')),
+        body: Center(child: Text('এই page টা নেই!')),
+      ),
+    );
+  },
+)
+
+► onUnknownRoute:
+   - কেউ ভুল route এ গেলে এই screen দেখাবে।
+   - Website এর 404 page এর মতো।
+   - routes বা onGenerateRoute এ না থাকা কোনো route এ
+     navigate করলে এটা call হয়।
+
+
+──────────────────────────────────────────────────────────────
+PART 6 — Locale (ভাষা)
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  locale: Locale('bn'),
+  supportedLocales: [
+    Locale('en', 'US'),
+    Locale('bn', 'BD'),
+  ],
+  localizationsDelegates: [
+    GlobalMaterialLocalizations.delegate,
+    GlobalWidgetsLocalizations.delegate,
+    GlobalCupertinoLocalizations.delegate,
+  ],
+)
+
+► locale:
+   - App এর ডিফল্ট ভাষা কোনটা।
+   - Locale('bn') → বাংলা
+   - Locale('en') → English
+   - Locale('ar') → Arabic
+
+► supportedLocales:
+   - App কোন কোন ভাষা support করে তার তালিকা।
+   - প্রথম argument → ভাষার code
+   - দ্বিতীয় argument → দেশের code (optional)
+
+► localizationsDelegates:
+   - Flutter কে বলে কীভাবে ভাষা পরিবর্তন করতে হবে।
+   - এটা ব্যবহার করতে pubspec.yaml এ package যোগ করতে হয়:
+     flutter_localizations
+
+
+──────────────────────────────────────────────────────────────
+PART 7 — navigatorKey (Global Navigation)
+──────────────────────────────────────────────────────────────
+
+final GlobalKey<NavigatorState> navigatorKey =
+    GlobalKey<NavigatorState>();
+
+MaterialApp(
+  navigatorKey: navigatorKey,
+)
+
+// যেকোনো জায়গা থেকে navigate করো (context ছাড়া):
+navigatorKey.currentState?.pushNamed('/about');
+
+► navigatorKey:
+   - সাধারণত context দিয়ে navigate করতে হয়।
+   - কিন্তু কখনো কখনো context পাওয়া যায় না
+     (যেমন: background service, notification থেকে navigate করতে)।
+   - তখন এই navigatorKey দিয়ে navigate করা যায়।
+
+
+──────────────────────────────────────────────────────────────
+PART 8 — scrollBehavior
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  scrollBehavior: ScrollBehavior().copyWith(
+    physics: BouncingScrollPhysics(), // iOS এর মতো bounce effect
+  ),
+)
+
+► scrollBehavior:
+   - পুরো app এ scroll কেমন হবে সেটা control করে।
+   - BouncingScrollPhysics → iOS এর মতো bounce করে
+   - ClampingScrollPhysics → Android এর মতো (default)
+   - Web এ mouse দিয়েও scroll করা যাবে কিনা সেটাও ঠিক করা যায়।
+
+
+──────────────────────────────────────────────────────────────
+PART 9 — অন্যান্য কম ব্যবহৃত কিন্তু জানা দরকার
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  color: Colors.blue,
+  // → App এর splash screen এর background color
+
+  showSemanticsDebugger: false,
+  // → Accessibility debugger চালু/বন্ধ করো
+
+  showPerformanceOverlay: false,
+  // → Performance graph দেখাবে (fps, rendering সময়)
+  // → true করলে screen এ graph আসে — debug কাজে লাগে
+
+  checkerboardRasterCacheImages: false,
+  // → Cache হওয়া image চিহ্নিত করো (debug কাজে লাগে)
+
+  restorationScopeId: 'app',
+  // → App বন্ধ হলে state restore করার জন্য unique id
+)
+
+
+──────────────────────────────────────────────────────────────
+সব মিলিয়ে পুরো MaterialApp
+──────────────────────────────────────────────────────────────
+
+MaterialApp(
+  // Basic
+  title: 'My App',
+  debugShowCheckedModeBanner: false,
+
+  // Theme
+  theme: ThemeData(
+    primaryColor: Colors.blue,
+    useMaterial3: true,
+  ),
+  darkTheme: ThemeData.dark(),
+  themeMode: ThemeMode.system,
+
+  // Navigation
+  initialRoute: '/',
+  routes: {
+    '/': (context) => HomeScreen(),
+    '/about': (context) => AboutScreen(),
+  },
+  onGenerateRoute: (settings) { ... },
+  onUnknownRoute: (settings) { ... },
+  navigatorKey: navigatorKey,
+
+  // Locale
+  locale: Locale('bn'),
+  supportedLocales: [Locale('en'), Locale('bn')],
+
+  // Scroll
+  scrollBehavior: ScrollBehavior(),
+)
+
+
+──────────────────────────────────────────────────────────────
+কোনটা কতটা দরকারি — Summary Table
+──────────────────────────────────────────────────────────────
+
+Property                    | দরকারি?
+----------------------------|----------------------------------
+home / routes               | ✅ অবশ্যই লাগবে (একটা হলেই হয়)
+title                       | ✅ রাখা উচিত
+theme                       | ✅ রাখা উচিত
+debugShowCheckedModeBanner  | ✅ false করে রাখো
+darkTheme + themeMode       | 🔶 dark mode চাইলে
+onGenerateRoute             | 🔶 data পাঠিয়ে navigate করতে
+onUnknownRoute              | 🔶 বড় app এ 404 page এর জন্য
+navigatorKey                | 🔶 context ছাড়া navigate করতে
+locale                      | 🔶 multi-language app এ
+scrollBehavior              | 🔶 scroll style পরিবর্তনে
+showPerformanceOverlay      | 🔷 শুধু debug এর সময়
+
+
+══════════════════════════════════════════════════════════════
+                        শেষ কথা
+══════════════════════════════════════════════════════════════
+
+► home বনাম routes:
+   - ছোট app → home ব্যবহার করো
+   - বড় app, একাধিক screen → routes ব্যবহার করো
+   - একসাথে home ও routes এ '/' — এটা করা যাবে না
+
+► theme বনাম colorScheme:
+   - পুরনো পদ্ধতি → primaryColor
+   - নতুন পদ্ধতি  → colorScheme: ColorScheme.fromSeed(...)
+
+══════════════════════════════════════════════════════════════

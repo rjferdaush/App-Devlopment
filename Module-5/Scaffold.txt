@@ -1,0 +1,822 @@
+
+╔══════════════════════════════════════════════════════════════╗
+║              Flutter — Scaffold সম্পূর্ণ নোট                ║
+╚══════════════════════════════════════════════════════════════╝
+
+Scaffold কী?
+─────────────
+Scaffold হলো Flutter এ একটা screen এর সম্পূর্ণ কাঠামো।
+যেমন একটা বাড়িতে থাকে:
+  - ছাদ         → AppBar
+  - মেঝে        → body
+  - নিচের বার   → BottomNavigationBar
+  - পাশের দরজা  → Drawer
+  - ভাসমান btn  → FloatingActionButton
+
+প্রতিটা নতুন screen = একটা নতুন Scaffold।
+
+
+══════════════════════════════════════════════════════════════
+PART 1 — AppBar (উপরের bar)
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  appBar: AppBar(
+
+    title: Text('My App'),
+    // → AppBar এর মাঝে বা বামে যে শিরোনাম দেখায়।
+
+    centerTitle: true,
+    // → true  → title মাঝে থাকবে
+    // → false → title বামে থাকবে (Android default)
+
+    backgroundColor: Colors.blue,
+    // → AppBar এর পেছনের রং।
+
+    foregroundColor: Colors.white,
+    // → AppBar এর ভেতরের সব লেখা ও icon এর রং।
+
+    elevation: 4.0,
+    // → AppBar এর নিচে ছায়া কতটুকু পড়বে।
+    // → 0 দিলে ছায়া থাকবে না।
+
+    leading: IconButton(
+      icon: Icon(Icons.menu),
+      onPressed: () {},
+    ),
+    // → AppBar এর একদম বাম দিকের icon।
+    // → Drawer থাকলে Flutter নিজেই hamburger icon দেয়।
+    // → নিজে দিলে সেটা override হয়।
+
+    automaticallyImplyLeading: true,
+    // → true  → Flutter নিজে back বা menu icon দেয়
+    // → false → leading icon দেখাবে না
+
+    actions: [
+      IconButton(icon: Icon(Icons.search), onPressed: () {}),
+      IconButton(icon: Icon(Icons.notifications), onPressed: () {}),
+      PopupMenuButton(
+        itemBuilder: (context) => [
+          PopupMenuItem(value: 1, child: Text('Settings')),
+          PopupMenuItem(value: 2, child: Text('Logout')),
+        ],
+      ),
+    ],
+    // → AppBar এর ডান দিকে icon বা button গুলো।
+    // → List আকারে একাধিক দেওয়া যায়।
+
+    bottom: TabBar(
+      tabs: [
+        Tab(text: 'Home'),
+        Tab(text: 'Profile'),
+        Tab(text: 'Settings'),
+      ],
+    ),
+    // → AppBar এর নিচে আরেকটা bar।
+    // → সাধারণত TabBar দেওয়া হয়।
+    // → যেকোনো PreferredSizeWidget দেওয়া যায়।
+
+    flexibleSpace: Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blue, Colors.purple],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+      ),
+    ),
+    // → AppBar এর পেছনে background হিসেবে যা বসে।
+    // → Gradient বা Image দেওয়া যায়।
+
+    toolbarHeight: 60.0,
+    // → AppBar এর উচ্চতা পরিবর্তন করা যায়।
+    // → Default 56.0 pixel।
+
+    shadowColor: Colors.black,
+    // → elevation এর ছায়ার রং।
+
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        bottom: Radius.circular(20),
+      ),
+    ),
+    // → AppBar এর shape পরিবর্তন — নিচে গোলাকার করা যায়।
+
+  ),
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 2 — body (মূল content)
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  body: YourWidget(),
+  // → Screen এর মূল content এখানে বসে।
+  // → যেকোনো Widget দেওয়া যায়।
+)
+
+body তে সবচেয়ে বেশি যা ব্যবহার হয়:
+──────────────────────────────────────
+
+► Column
+  → উপর থেকে নিচে widget সাজাও।
+  body: Column(
+    mainAxisAlignment: MainAxisAlignment.center,
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [ Text('A'), Text('B'), Text('C') ],
+  )
+
+► Row
+  → বাম থেকে ডানে widget সাজাও।
+  body: Row(
+    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+    children: [ Icon(Icons.star), Text('Hello') ],
+  )
+
+► Stack
+  → একটার উপর আরেকটা রাখো।
+  body: Stack(
+    children: [
+      Image.network('url'),           // নিচে
+      Positioned(
+        bottom: 10, right: 10,
+        child: Text('উপরে লেখা'),    // উপরে
+      ),
+    ],
+  )
+
+► ListView
+  → Scroll করা যায় এমন list।
+  body: ListView.builder(
+    itemCount: 20,
+    itemBuilder: (context, index) => ListTile(
+      title: Text('Item $index'),
+    ),
+  )
+
+► GridView
+  → Grid আকারে সাজাও।
+  body: GridView.count(
+    crossAxisCount: 2,               // কলাম সংখ্যা
+    children: [ ... ],
+  )
+
+► SingleChildScrollView
+  → পুরো page scroll করো।
+  body: SingleChildScrollView(
+    child: Column( children: [ ... ] ),
+  )
+
+► Container
+  → Box বানাও, রং দাও, padding দাও।
+  body: Container(
+    color: Colors.blue,
+    padding: EdgeInsets.all(16),
+    child: Text('Hello'),
+  )
+
+► Center
+  → Content কে মাঝে নিয়ে আসো।
+  body: Center(
+    child: Text('আমি মাঝে আছি'),
+  )
+
+
+══════════════════════════════════════════════════════════════
+PART 3 — FloatingActionButton (ভাসমান button)
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  floatingActionButton: FloatingActionButton(
+    onPressed: () {},
+    // → Button চাপলে কী হবে।
+
+    backgroundColor: Colors.blue,
+    // → Button এর রং।
+
+    foregroundColor: Colors.white,
+    // → ভেতরের icon এর রং।
+
+    elevation: 6.0,
+    // → Button এর ছায়া।
+
+    tooltip: 'নতুন যোগ করো',
+    // → Button এর উপর ধরে রাখলে যে hint দেখায়।
+
+    shape: CircleBorder(),
+    // → Button এর shape। Default গোলাকার।
+
+    child: Icon(Icons.add),
+    // → Button এর ভেতরে কী থাকবে।
+  ),
+
+  floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+  // → Button কোথায় থাকবে:
+  //   endFloat    → নিচে ডানে ভাসমান (default)
+  //   centerFloat → নিচে মাঝে ভাসমান
+  //   startFloat  → নিচে বামে ভাসমান
+  //   endDocked   → BottomBar এর ডানে ঢুকে যাবে
+  //   centerDocked→ BottomBar এর মাঝে ঢুকে যাবে
+  //   startDocked → BottomBar এর বামে ঢুকে যাবে
+)
+
+FAB এর ধরন:
+────────────
+
+► সাধারণ FAB (গোলাকার):
+  FloatingActionButton(
+    onPressed: () {},
+    child: Icon(Icons.add),
+  )
+
+► Extended FAB (লম্বা, লেখাসহ):
+  FloatingActionButton.extended(
+    onPressed: () {},
+    icon: Icon(Icons.add),
+    label: Text('নতুন যোগ করো'),
+  )
+
+► Small FAB (ছোট):
+  FloatingActionButton.small(
+    onPressed: () {},
+    child: Icon(Icons.add),
+  )
+
+► Large FAB (বড়):
+  FloatingActionButton.large(
+    onPressed: () {},
+    child: Icon(Icons.add),
+  )
+
+
+══════════════════════════════════════════════════════════════
+PART 4 — Drawer (পাশের menu)
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  drawer: Drawer(                    // বাম দিক থেকে আসে
+    backgroundColor: Colors.white,
+    // → Drawer এর background রং।
+
+    elevation: 16.0,
+    // → Drawer এর ছায়া।
+
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.only(
+        topRight: Radius.circular(20),
+        bottomRight: Radius.circular(20),
+      ),
+    ),
+    // → Drawer এর shape।
+
+    child: ListView(
+      padding: EdgeInsets.zero,
+      children: [
+
+        DrawerHeader(
+          // → Drawer এর উপরের বড় অংশ।
+          decoration: BoxDecoration(color: Colors.blue),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 35,
+                backgroundImage: NetworkImage('url'),
+              ),
+              SizedBox(height: 8),
+              Text('Ferdaush',
+                style: TextStyle(color: Colors.white, fontSize: 18)),
+              Text('ferdaush@email.com',
+                style: TextStyle(color: Colors.white70)),
+            ],
+          ),
+        ),
+
+        ListTile(
+          leading: Icon(Icons.home),
+          title: Text('Home'),
+          trailing: Icon(Icons.arrow_forward_ios, size: 14),
+          onTap: () {
+            Navigator.pop(context);     // Drawer বন্ধ করো
+            Navigator.pushNamed(context, '/');
+          },
+        ),
+
+        ListTile(
+          leading: Icon(Icons.person),
+          title: Text('Profile'),
+          onTap: () {},
+        ),
+
+        Divider(),                     // আলাদা করার line
+
+        ListTile(
+          leading: Icon(Icons.settings),
+          title: Text('Settings'),
+          onTap: () {},
+        ),
+
+        ListTile(
+          leading: Icon(Icons.logout, color: Colors.red),
+          title: Text('Logout', style: TextStyle(color: Colors.red)),
+          onTap: () {},
+        ),
+
+      ],
+    ),
+  ),
+
+  endDrawer: Drawer( ... ),
+  // → ডান দিক থেকে আসে। একই ভাবে ব্যবহার করা হয়।
+)
+
+Drawer খুলতে ও বন্ধ করতে:
+────────────────────────────
+// Code দিয়ে Drawer খুলতে:
+Scaffold.of(context).openDrawer();
+
+// Code দিয়ে EndDrawer খুলতে:
+Scaffold.of(context).openEndDrawer();
+
+// Drawer বন্ধ করতে:
+Navigator.pop(context);
+
+
+══════════════════════════════════════════════════════════════
+PART 5 — BottomNavigationBar (নিচের tab bar)
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  bottomNavigationBar: BottomNavigationBar(
+
+    currentIndex: _selectedIndex,
+    // → এখন কোন tab selected আছে (0 থেকে শুরু)।
+
+    onTap: (int index) {
+      setState(() { _selectedIndex = index; });
+    },
+    // → কোনো tab চাপলে কী হবে।
+
+    selectedItemColor: Colors.blue,
+    // → Selected tab এর রং।
+
+    unselectedItemColor: Colors.grey,
+    // → Unselected tab এর রং।
+
+    backgroundColor: Colors.white,
+    // → Bar এর background রং।
+
+    elevation: 8.0,
+    // → Bar এর উপরে ছায়া।
+
+    type: BottomNavigationBarType.fixed,
+    // → fixed   → সব item সবসময় দেখা যায়
+    // → shifting → selected item বড় হয়, অন্যগুলো label লুকায়
+
+    showSelectedLabels: true,
+    // → Selected tab এর label দেখাবে কিনা।
+
+    showUnselectedLabels: true,
+    // → Unselected tab এর label দেখাবে কিনা।
+
+    items: [
+      BottomNavigationBarItem(
+        icon: Icon(Icons.home_outlined),
+        activeIcon: Icon(Icons.home),   // selected হলে এই icon
+        label: 'Home',
+        backgroundColor: Colors.blue,   // shifting type এ কাজ করে
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.search),
+        label: 'Search',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.favorite_border),
+        activeIcon: Icon(Icons.favorite),
+        label: 'Favourite',
+      ),
+      BottomNavigationBarItem(
+        icon: Icon(Icons.person_outline),
+        activeIcon: Icon(Icons.person),
+        label: 'Profile',
+      ),
+    ],
+  ),
+)
+
+NavigationBar (Material 3 — নতুন পদ্ধতি):
+────────────────────────────────────────────
+Scaffold(
+  bottomNavigationBar: NavigationBar(
+    selectedIndex: _selectedIndex,
+    onDestinationSelected: (index) {
+      setState(() { _selectedIndex = index; });
+    },
+    backgroundColor: Colors.white,
+    elevation: 4,
+    indicatorColor: Colors.blue[100],  // selected এর পেছনে রং
+    destinations: [
+      NavigationDestination(
+        icon: Icon(Icons.home_outlined),
+        selectedIcon: Icon(Icons.home),
+        label: 'Home',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.search),
+        label: 'Search',
+      ),
+      NavigationDestination(
+        icon: Icon(Icons.person_outline),
+        selectedIcon: Icon(Icons.person),
+        label: 'Profile',
+      ),
+    ],
+  ),
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 6 — BottomSheet (নিচ থেকে আসা panel)
+══════════════════════════════════════════════════════════════
+
+দুই ধরনের BottomSheet আছে:
+
+► ১. Persistent BottomSheet (সবসময় দেখা যায়):
+  Scaffold(
+    bottomSheet: Container(
+      height: 70,
+      width: double.infinity,
+      color: Colors.blue[50],
+      child: Center(
+        child: Text('সবসময় এখানে থাকে'),
+      ),
+    ),
+  )
+
+► ২. Modal BottomSheet (button চাপলে আসে):
+  ElevatedButton(
+    onPressed: () {
+      showModalBottomSheet(
+        context: context,
+
+        isScrollControlled: true,
+        // → true করলে BottomSheet অনেক বড় হতে পারে
+        // → Keyboard এর সাথে উপরে উঠবে
+
+        backgroundColor: Colors.white,
+        // → Sheet এর background রং।
+
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(
+            top: Radius.circular(20),   // উপরে গোলাকার
+          ),
+        ),
+
+        isDismissible: true,
+        // → true → বাইরে tap করলে বন্ধ হবে
+
+        enableDrag: true,
+        // → true → উপর নিচে swipe করে বন্ধ করা যাবে
+
+        builder: (context) => Container(
+          height: 300,
+          padding: EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Container(
+                width: 40, height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.grey[300],
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              SizedBox(height: 16),
+              ListTile(
+                leading: Icon(Icons.share),
+                title: Text('Share'),
+                onTap: () {},
+              ),
+              ListTile(
+                leading: Icon(Icons.copy),
+                title: Text('Copy'),
+                onTap: () {},
+              ),
+              ListTile(
+                leading: Icon(Icons.delete, color: Colors.red),
+                title: Text('Delete', style: TextStyle(color: Colors.red)),
+                onTap: () {},
+              ),
+            ],
+          ),
+        ),
+      );
+    },
+    child: Text('BottomSheet খোলো'),
+  )
+
+
+══════════════════════════════════════════════════════════════
+PART 7 — SnackBar (নিচে popup message)
+══════════════════════════════════════════════════════════════
+
+// SnackBar দেখাতে:
+ScaffoldMessenger.of(context).showSnackBar(
+  SnackBar(
+    content: Text('সফলভাবে save হয়েছে!'),
+    // → SnackBar এর ভেতরে লেখা।
+
+    duration: Duration(seconds: 3),
+    // → কতক্ষণ দেখাবে।
+
+    backgroundColor: Colors.green,
+    // → SnackBar এর রং।
+
+    behavior: SnackBarBehavior.floating,
+    // → floating → নিচ থেকে একটু উপরে ভাসে
+    // → fixed    → একদম নিচে লেগে থাকে
+
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(10),
+    ),
+    // → SnackBar এর shape।
+
+    margin: EdgeInsets.all(12),
+    // → SnackBar এর চারদিকে ফাঁকা।
+    // → behavior: floating হলে কাজ করে।
+
+    action: SnackBarAction(
+      label: 'Undo',
+      textColor: Colors.yellow,
+      onPressed: () {
+        // Undo button চাপলে কী হবে
+      },
+    ),
+    // → SnackBar এর ডানে একটা button।
+  ),
+);
+
+// SnackBar লুকাতে:
+ScaffoldMessenger.of(context).hideCurrentSnackBar();
+
+// সব SnackBar সরাতে:
+ScaffoldMessenger.of(context).clearSnackBars();
+
+
+══════════════════════════════════════════════════════════════
+PART 8 — backgroundColor ও extendBody
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  backgroundColor: Colors.grey[100],
+  // → পুরো Scaffold এর background রং।
+  // → body এর পেছনে এই রং দেখা যাবে।
+
+  extendBody: true,
+  // → true  → body টা BottomNavigationBar এর পেছন পর্যন্ত চলে যাবে।
+  // → false → body BottomNavigationBar এর উপরেই শেষ হয়।
+  // → কাজে লাগে: BottomBar transparent করলে body এর content
+  //              নিচে দেখা যায় — সুন্দর effect।
+
+  extendBodyBehindAppBar: true,
+  // → true  → body টা AppBar এর পেছন পর্যন্ত চলে যাবে।
+  // → false → body AppBar এর নিচ থেকে শুরু হয় (default)।
+  // → কাজে লাগে: AppBar transparent করলে body এর image
+  //              বা content AppBar এর পেছনেও দেখা যায়।
+  //   উদাহরণ:
+  //   appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0)
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 9 — resizeToAvoidBottomInset
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  resizeToAvoidBottomInset: true,
+  // → true (default):
+  //   Keyboard আসলে body ছোট হয়ে যায়।
+  //   TextField টা keyboard এর উপরে চলে আসে।
+  //   Form screen এ এটাই দরকার।
+
+  // → false:
+  //   Keyboard আসলেও body ছোট হয় না।
+  //   Keyboard content ঢেকে দেয়।
+  //   Full screen image বা map screen এ ব্যবহার করা হয়।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 10 — persistentFooterButtons
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  persistentFooterButtons: [
+    TextButton(
+      onPressed: () {},
+      child: Text('Cancel'),
+    ),
+    ElevatedButton(
+      onPressed: () {},
+      child: Text('Save'),
+    ),
+  ],
+  // → নিচে সবসময় দেখা যায় এমন button row।
+  // → BottomNavigationBar থেকে আলাদা।
+  // → Dialog, form, বা confirmation screen এ কাজে লাগে।
+
+  persistentFooterAlignment: AlignmentDirectional.centerEnd,
+  // → button গুলো কোন দিকে থাকবে:
+  //   centerEnd   → ডানে (default)
+  //   center      → মাঝে
+  //   centerStart → বামে
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 11 — drawerScrimColor
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  drawer: Drawer( ... ),
+  drawerScrimColor: Colors.black54,
+  // → Drawer খোলা থাকলে বাকি screen এ যে অন্ধকার পড়ে
+  //   সেটার রং ও opacity নিয়ন্ত্রণ করা যায়।
+  // → Colors.transparent দিলে অন্ধকার থাকবে না।
+  // → Colors.black87 দিলে আরো গাঢ় অন্ধকার হবে।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 12 — drawerEdgeDragWidth
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  drawer: Drawer( ... ),
+  drawerEdgeDragWidth: 40.0,
+  // → Screen এর বাম দিক থেকে কত pixel এর মধ্যে swipe করলে
+  //   Drawer খুলবে।
+  // → Default 20.0 pixel।
+  // → বাড়ালে সহজে Drawer খোলা যায়।
+  // → কমালে accidentally খোলার সম্ভাবনা কমে।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 13 — Drawer Gesture Enable/Disable
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  drawer: Drawer( ... ),
+  drawerEnableOpenDragGesture: true,
+  // → true  → swipe করে Drawer খোলা যাবে (default)।
+  // → false → শুধু button চাপলে Drawer খুলবে।
+  //           Swipe করলে খুলবে না।
+  //           যেসব screen এ horizontal swipe দরকার
+  //           (যেমন PageView, image gallery) সেখানে
+  //           false করা দরকার।
+
+  endDrawerEnableOpenDragGesture: true,
+  // → ডান দিকের Drawer এর জন্য একই কাজ।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 14 — onDrawerChanged / onEndDrawerChanged
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  drawer: Drawer( ... ),
+
+  onDrawerChanged: (bool isOpen) {
+    if (isOpen) {
+      print('বাম Drawer খুলেছে');
+      // Drawer খোলার সময় যা করতে চাও
+    } else {
+      print('বাম Drawer বন্ধ হয়েছে');
+      // Drawer বন্ধের সময় যা করতে চাও
+    }
+  },
+  // → Drawer খোলা বা বন্ধ হলে এই function call হয়।
+  // → Analytics বা state update এর কাজে লাগে।
+
+  onEndDrawerChanged: (bool isOpen) {
+    // → ডান দিকের Drawer খোলা/বন্ধের সময় call হয়।
+  },
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 15 — primary
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  primary: true,
+  // → true (default):
+  //   AppBar status bar এর নিচে থেকে শুরু হয়।
+  //   Status bar এর উচ্চতা automatically বাদ যায়।
+  //   এটাই স্বাভাবিক।
+
+  // → false:
+  //   AppBar একদম উপর থেকে শুরু হয়।
+  //   Status bar ঢেকে যায়।
+  //   সাধারণত এটা ব্যবহার হয় না।
+)
+
+
+══════════════════════════════════════════════════════════════
+সব Properties একসাথে — চূড়ান্ত Scaffold
+══════════════════════════════════════════════════════════════
+
+Scaffold(
+  // ─── Basic ────────────────────────────────────────
+  appBar: AppBar(
+    title: Text('My App'),
+    centerTitle: true,
+    actions: [ IconButton(icon: Icon(Icons.search), onPressed: () {}) ],
+  ),
+  body: Center(child: Text('Hello World')),
+
+  // ─── FAB ──────────────────────────────────────────
+  floatingActionButton: FloatingActionButton(
+    onPressed: () {},
+    child: Icon(Icons.add),
+  ),
+  floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+
+  // ─── Drawer ───────────────────────────────────────
+  drawer: Drawer( child: ListView( children: [ ... ] ) ),
+  endDrawer: Drawer( child: ListView( children: [ ... ] ) ),
+  drawerScrimColor: Colors.black54,
+  drawerEdgeDragWidth: 40,
+  drawerEnableOpenDragGesture: true,
+  endDrawerEnableOpenDragGesture: true,
+  onDrawerChanged: (isOpen) {},
+  onEndDrawerChanged: (isOpen) {},
+
+  // ─── Bottom ───────────────────────────────────────
+  bottomNavigationBar: BottomNavigationBar( items: [ ... ] ),
+  bottomSheet: Container( ... ),
+  persistentFooterButtons: [ TextButton(...), ElevatedButton(...) ],
+  persistentFooterAlignment: AlignmentDirectional.centerEnd,
+
+  // ─── Appearance ───────────────────────────────────
+  backgroundColor: Colors.white,
+  extendBody: false,
+  extendBodyBehindAppBar: false,
+  resizeToAvoidBottomInset: true,
+  primary: true,
+)
+
+
+══════════════════════════════════════════════════════════════
+Visual Layout — কোনটা কোথায় থাকে
+══════════════════════════════════════════════════════════════
+
+┌──────────────────────────────────────┐
+│  ← leading    title    actions →     │  ← appBar
+│─────────────────────────────────────│
+│         TabBar (bottom)              │  ← appBar.bottom
+├──────────────────────────────────────┤
+│                                      │
+│                                      │
+│              body                    │
+│                                      │
+│                               [ + ]  │  ← floatingActionButton
+├──────────────────────────────────────┤
+│  [ Cancel ]            [ Save ]      │  ← persistentFooterButtons
+├──────────────────────────────────────┤
+│   🏠 Home   🔍 Search   👤 Profile   │  ← bottomNavigationBar
+└──────────────────────────────────────┘
+↕
+Drawer (বাম থেকে আসে)  |  endDrawer (ডান থেকে আসে)
+
+
+══════════════════════════════════════════════════════════════
+Summary Table — কোনটা কতটা দরকারি
+══════════════════════════════════════════════════════════════
+
+Property                        | ব্যবহার
+────────────────────────────────|─────────────────────────────
+appBar                          | ✅ প্রায় সবসময়
+body                            | ✅ অবশ্যই লাগবে
+floatingActionButton            | 🔶 নতুন কিছু add করার screen এ
+floatingActionButtonLocation    | 🔶 FAB থাকলে position ঠিক করতে
+drawer                          | 🔶 navigation menu এর জন্য
+endDrawer                       | 🔶 ডান দিকের menu দরকার হলে
+bottomNavigationBar             | 🔶 একাধিক main screen থাকলে
+bottomSheet                     | 🔶 extra panel দরকার হলে
+persistentFooterButtons         | 🔶 form বা dialog screen এ
+backgroundColor                 | 🔶 screen এর রং বদলাতে
+extendBody                      | 🔶 transparent bottom bar effect
+extendBodyBehindAppBar          | 🔶 transparent AppBar effect
+resizeToAvoidBottomInset        | 🔶 form এ keyboard handle করতে
+drawerScrimColor                | 🔷 খুব কম দরকার হয়
+drawerEdgeDragWidth             | 🔷 খুব কম দরকার হয়
+drawerEnableOpenDragGesture     | 🔶 PageView এর সাথে থাকলে
+onDrawerChanged                 | 🔶 drawer state track করতে
+primary                         | 🔷 প্রায় কখনো বদলাতে হয় না
+
+✅ = অবশ্যই   🔶 = দরকার হলে   🔷 = বিরল
+
+══════════════════════════════════════════════════════════════

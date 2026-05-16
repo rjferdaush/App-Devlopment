@@ -1,0 +1,164 @@
+================================================================
+        FLUTTER LAYOUT CHEATSHEET — বাংলা নোট
+================================================================
+
+----------------------------------------------------------------
+1. CHILD vs CHILDREN
+----------------------------------------------------------------
+
+  child    → যে widget শুধু একটাই সন্তান নেয়
+  children → যে widget অনেক সন্তান নেয় (list আকারে)
+
+  Widget          | কতটা নেয় | Type
+  ----------------+-----------+------------------
+  Container       | ১টা       | child
+  Center          | ১টা       | child
+  Padding         | ১টা       | child
+  SizedBox        | ১টা       | child
+  Column          | অনেক      | children: [ ]
+  Row             | অনেক      | children: [ ]
+  Stack           | অনেক      | children: [ ]
+  ListView        | অনেক      | children: [ ]
+
+  উদাহরণ:
+  --------
+  // child (একটাই)
+  Container(
+    child: Text('আমি একা'),
+  )
+
+  // children (অনেকগুলো)
+  Column(
+    children: [
+      Text('প্রথম'),
+      Text('দ্বিতীয়'),
+      Text('তৃতীয়'),
+    ],
+  )
+
+----------------------------------------------------------------
+2. ROW vs COLUMN
+----------------------------------------------------------------
+
+  Row    → পাশাপাশি (horizontal ➡️)
+  Column → উপর-নিচ  (vertical   ⬇️)
+
+  // Row উদাহরণ
+  Row(
+    children: [
+      Icon(Icons.star),
+      Icon(Icons.star),
+      Icon(Icons.star),
+    ],
+  )
+  // Output: ⭐ ⭐ ⭐  (একই লাইনে)
+
+  // Column উদাহরণ
+  Column(
+    children: [
+      Text('নাম'),
+      Text('বয়স'),
+      Text('ঠিকানা'),
+    ],
+  )
+  // Output:
+  // নাম
+  // বয়স
+  // ঠিকানা
+
+----------------------------------------------------------------
+3. CONTAINER
+----------------------------------------------------------------
+
+  Container = একটা বাক্স
+  কাজ: color, size, padding, margin, border, shape দেওয়া
+
+  Container(
+    width: 200,
+    height: 100,
+    margin: EdgeInsets.all(10),      // বাইরের ফাঁকা জায়গা
+    padding: EdgeInsets.all(16),     // ভেতরের ফাঁকা জায়গা
+    decoration: BoxDecoration(
+      color: Colors.blue,
+      borderRadius: BorderRadius.circular(12),  // গোল কোণা
+    ),
+    child: Text('আমি Container এর ভেতরে'),
+  )
+
+  Container কী কী করতে পারে:
+  ----------------------------
+  width, height       → size নির্ধারণ
+  color               → রং দেওয়া
+  padding             → ভেতরের ফাঁকা জায়গা
+  margin              → বাইরের ফাঁকা জায়গা
+  decoration          → border, radius, gradient ইত্যাদি
+
+  ⚠️  সাবধান:
+  color আর decoration একসাথে দেওয়া যাবে না!
+  decoration দিলে তার ভেতরে color দাও।
+
+----------------------------------------------------------------
+4. গুরুত্বপূর্ণ EXTRA LAYOUT WIDGETS
+----------------------------------------------------------------
+
+  // Center — মাঝখানে রাখে
+  Center(
+    child: Text('আমি মাঝখানে'),
+  )
+
+  // Padding — চারদিকে ফাঁকা জায়গা দেয়
+  Padding(
+    padding: EdgeInsets.all(16),
+    child: Text('আমার চারপাশে ফাঁকা'),
+  )
+
+  // SizedBox — নির্দিষ্ট gap দেয়
+  SizedBox(height: 20)   // Column এ উপর-নিচ gap
+  SizedBox(width: 10)    // Row এ পাশাপাশি gap
+
+  // Expanded — বাকি জায়গা পূরণ করে
+  Row(
+    children: [
+      Text('ছোট'),
+      Expanded(
+        child: Text('আমি বাকি সব জায়গা নেবো'),
+      ),
+    ],
+  )
+
+  // Stack — উপর-নিচে layer করে রাখে
+  Stack(
+    children: [
+      Image.asset('background.png'),  // নিচে
+      Text('আমি উপরে'),              // উপরে
+    ],
+  )
+
+----------------------------------------------------------------
+5. WIDGET TREE — কে কার ভেতরে যায়
+----------------------------------------------------------------
+
+  MaterialApp
+   └── Scaffold
+         ├── appBar: AppBar()
+         ├── body: SafeArea
+         │         └── Container
+         │               └── Column / Row
+         │                     └── Text, Icon, Image, Button...
+         └── floatingActionButton: FloatingActionButton()
+
+----------------------------------------------------------------
+6. মূল নিয়ম — একনজরে
+----------------------------------------------------------------
+
+  ✅ একটা widget      →  child:    Widget()
+  ✅ অনেক widget      →  children: [ ]
+  ✅ পাশাপাশি         →  Row( children: [ ] )
+  ✅ উপর-নিচ          →  Column( children: [ ] )
+  ✅ সাজাতে/রং দিতে   →  Container( child: )
+  ✅ উপরে-নিচে Layer  →  Stack( children: [ ] )
+  ✅ মাঝখানে রাখতে    →  Center( child: )
+  ✅ Gap দিতে         →  SizedBox( height/width: )
+  ✅ বাকি জায়গা নিতে →  Expanded( child: )
+
+================================================================

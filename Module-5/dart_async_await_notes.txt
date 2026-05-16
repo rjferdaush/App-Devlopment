@@ -1,0 +1,141 @@
+╔══════════════════════════════════════════════════════════════╗
+║              Dart — async / await Notes                      ║
+╚══════════════════════════════════════════════════════════════╝
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Future কী?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  Future মানে "ভবিষ্যতে কিছু একটা আসবে — এখন না"
+
+  Future<String>  → eventually একটা String আসবে
+  Future<int>     → eventually একটা int আসবে
+  Future<void>    → eventually শুধু "হয়ে গেছে" জানাবে
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  async কী?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → function এর আগে লেখা হয়
+  → বলে দেয় "এই function এ await ব্যবহার করা হবে"
+  → async function সবসময় Future return করে
+
+  Future<String> greet() async {
+    ...
+  }
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  await কী?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  → "থামো, value আসুক, তারপর পরের কাজ করো"
+  → শুধু async function এর ভেতরে লেখা যায়
+  → Future এর ভেতর থেকে actual value বের করে আনে
+
+  String name = await fetchUsername();
+  //            ↑ Future<String> থেকে String বের করলো
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Mental Model — Pause Button
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  showUser() চালু হলো
+        │
+        ▼
+  await fetchUsername()  ← ⏸️ শুধু এই function থামলো
+        │
+        │  ← এই সময় বাকি program চলতে থাকে
+        │  ← অন্য functions, timers সব চলছে
+        │
+        ▼
+    value আসলো ▶️ resume
+        │
+        ▼
+  print("Hello, $name!")
+
+  ⚠️ পুরো program থামে না — শুধু ঐ function টা থামে
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  .then() vs async/await
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  .then() style — পড়তে কষ্ট:
+
+    fetchUsername().then((name) {
+      fetchProfile(name).then((profile) {
+        fetchPosts(profile).then((posts) {
+          render(posts);   // Pyramid of doom 😵
+        });
+      });
+    });
+
+
+  async/await style — সহজ, পরিষ্কার ✅
+
+    Future<void> load() async {
+      String name     = await fetchUsername();
+      Profile profile = await fetchProfile(name);
+      List posts      = await fetchPosts(profile);
+      render(posts);
+    }
+
+  → দুইটা style একই কাজ করে
+  → async/await উপর থেকে নিচে পড়া যায়
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Error Handling
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  .then().catchError() style:
+
+    fetchUsername()
+      .then((name) => print(name))
+      .catchError((e) => print("Error: $e"));
+
+
+  async/await + try/catch style (বেশি ব্যবহার হয়):
+
+    try {
+      String name = await fetchUsername();
+      print(name);
+    } catch (e) {
+      print("Error: $e");
+    }
+
+  → .then()    সফল হলে চলে
+  → .catchError() / catch()    ব্যর্থ হলে চলে
+  → throw করলেই catchError/catch এ যায়
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  মূল ৩টা নিয়ম
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  1. await লিখলে function এ async লাগবে — বাধ্যতামূলক
+  2. async function সবসময় Future return করে
+  3. await শুধু ঐ function থামায়, পুরো program না
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  Quick Reference
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  return value;        → .then() এ যাবে       ✅
+  throw Exception();   → .catchError() এ যাবে ✅
+  return "ভুল";        → .then() এ যাবে       ⚠️ (error না!)
+
+  await ছাড়া          → Future object পাই
+  await সহ            → Future এর value পাই
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  এক কথায়
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  async/await হলো Future এর সুন্দর মুখোশ —
+  ভেতরে Future, বাইরে দেখতে normal code।

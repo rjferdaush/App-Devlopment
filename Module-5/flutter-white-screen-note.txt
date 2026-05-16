@@ -1,0 +1,102 @@
+================================================================
+        FLUTTER — WHITE SCREEN CODE NOTES
+        বাংলায় লাইন বাই লাইন ব্যাখ্যা
+================================================================
+
+CODE:
+------
+import 'package:flutter/material.dart';
+
+void main() {
+  runApp(MyApp());
+}
+
+class MyApp extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      home: Scaffold(
+        backgroundColor: Colors.white,
+      ),
+    );
+  }
+}
+
+================================================================
+
+লাইন বাই লাইন ব্যাখ্যা:
+--------------------------
+
+[১] import 'package:flutter/material.dart';
+
+    → Flutter এর সব widget এই file এ থাকে।
+    → এটা না লিখলে Text, Container, Colors কিছুই কাজ করবে না।
+    → সবসময় সবার উপরে লিখতে হয়।
+
+
+[২] void main() {
+      runApp(MyApp());
+    }
+
+    → main() হলো app এর দরজা। Flutter এখান থেকে শুরু করে।
+    → runApp() বলছে — এই MyApp widget টাকে চালু করো।
+
+
+[৩] class MyApp extends StatelessWidget {
+
+    → MyApp নামে একটা widget বানাচ্ছো।
+    → StatelessWidget মানে এই widget এ কোনো data বদলাবে না।
+    → শুধু দেখাবে, পরিবর্তন হবে না।
+
+
+[৪] Widget build(BuildContext context) {
+
+    → build() মানে — এই widget টা আঁকো।
+    → Flutter যখনই এই widget দেখাতে চায়, এই function call করে।
+
+
+[৫] return MaterialApp(
+
+    → MaterialApp হলো পুরো app এর wrapper।
+    → Google এর Material Design style এ app বানাতে এটা লাগে।
+    → এটা ছাড়া app চলবে না।
+
+
+[৬] home: Scaffold(
+
+    → home মানে — app খুললে সবার আগে কোন screen দেখাবে।
+    → Scaffold হলো সেই screen এর কাঠামো।
+
+
+[৭] backgroundColor: Colors.white,
+
+    → screen এর background color সাদা।
+    → এটা না লিখলেও সাদাই হতো, কিন্তু clearly বোঝার জন্য লেখা।
+
+================================================================
+
+Widget Tree (কে কার ভেতরে আছে):
+-----------------------------------
+
+    main()
+      └── MyApp
+            └── MaterialApp
+                  └── Scaffold
+                        └── backgroundColor: white
+
+    → একটার ভেতরে আরেকটা — এটাই Flutter এর নিয়ম।
+
+================================================================
+
+মনে রাখার Rules:
+-----------------
+
+    ✔ import সবসময় সবার উপরে
+    ✔ main() থেকে app শুরু
+    ✔ runApp() এ root widget দিতে হয়
+    ✔ MaterialApp সবসময় লাগবে
+    ✔ Scaffold হলো প্রতিটা screen এর কাঠামো
+    ✔ Data বদলাবে না → StatelessWidget
+    ✔ Data বদলাবে   → StatefulWidget
+
+================================================================

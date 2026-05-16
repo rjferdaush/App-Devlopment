@@ -1,0 +1,281 @@
+
+================================================================
+         FLUTTER MCQ NOTES — সম্পূর্ণ বাংলা নোট
+================================================================
+মোট প্রশ্ন: ১০ | বিষয়: Flutter | সব উত্তর বাংলায়
+================================================================
+
+
+----------------------------------------------------------------
+প্রশ্ন ০১:
+Which layer of Flutter architecture is responsible for
+rendering UI components?
+
+  A. Dart Layer
+  B. Framework Layer
+  C. Engine Layer          ✅ সঠিক উত্তর
+  D. Platform Layer
+
+উত্তর: C — Engine Layer
+
+ব্যাখ্যা:
+  → Flutter-এর ৩টি স্তর: Framework, Engine, Platform
+  → Engine Layer C++ দিয়ে লেখা
+  → Skia / Impeller ব্যবহার করে widget tree-কে পিক্সেলে রূপান্তর করে
+  → Framework Layer widget tree বানায়, কিন্তু render করে Engine
+
+💡 মনে রাখো:
+   Framework = বানায় | Engine = আঁকে | Platform = চালায়
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ০২:
+What is the main difference between Stateless and
+Stateful widgets?
+
+  A. Stateless widgets can change UI dynamically
+  B. Stateful widgets cannot rebuild
+  C. Stateful widgets can update UI based on state changes  ✅
+  D. Both are the same
+
+উত্তর: C — Stateful updates UI based on state changes
+
+ব্যাখ্যা:
+  → StatelessWidget: একবার build হয়, আর বদলায় না (লোগো, লেবেল)
+  → StatefulWidget: setState() call করলে UI আবার build হয়
+  → Counter, Form, Checkbox — এগুলোতে StatefulWidget লাগে
+
+💡 মনে রাখো:
+   Stateless = দেয়ালে লেখা (বদলায় না)
+   Stateful  = হোয়াইটবোর্ডে লেখা (মুছে নতুন লেখা যায়)
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ০৩:
+Which widget is used as the basic structure for a
+Flutter screen?
+
+  A. Container
+  B. Scaffold              ✅ সঠিক উত্তর
+  C. Column
+  D. Stack
+
+উত্তর: B — Scaffold
+
+ব্যাখ্যা:
+  → Scaffold হলো Flutter স্ক্রিনের কঙ্কাল / ভিত্তি
+  → AppBar, Body, FloatingActionButton, BottomNavigationBar,
+     Drawer — সব Scaffold এর মধ্যে থাকে
+  → Container = বাক্স, Column = উপর-নিচে সাজায়
+     Stack = একটার উপর একটা — কেউ পুরো structure দেয় না
+
+💡 মনে রাখো:
+   Scaffold = বাড়ির ভিত্তি
+   Container, Column, Stack = আসবাবপত্র
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ০৪:
+Which widget allows overlapping of children in Flutter?
+
+  A. Row
+  B. Column
+  C. Stack                 ✅ সঠিক উত্তর
+  D. Expanded
+
+উত্তর: C — Stack
+
+ব্যাখ্যা:
+  → Stack: children গুলো একটার উপর আরেকটা রাখে
+  → Row  = পাশাপাশি সাজায় (→)
+  → Column = উপর-নিচে সাজায় (↕)
+  → ছবির উপর নাম, notification badge — Stack দিয়ে হয়
+
+💡 মনে রাখো:
+   Stack = তাসের স্তূপ
+   একটার উপর একটা চাপিয়ে রাখো!
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ০৫:
+What is the role of Positioned widget?
+
+  A. Add padding
+  B. Align text
+  C. Position widgets inside a Stack    ✅ সঠিক উত্তর
+  D. Expand widgets
+
+উত্তর: C — Position widgets inside a Stack
+
+ব্যাখ্যা:
+  → Positioned শুধুমাত্র Stack-এর ভেতরে কাজ করে
+  → top, bottom, left, right দিয়ে নির্দিষ্ট জায়গায় রাখা যায়
+  → Row বা Column-এর ভেতরে Positioned কাজ করে না ❌
+
+  সঠিক ব্যবহার:
+  Stack > Positioned(top: 10, left: 10, child: ...)
+
+💡 মনে রাখো:
+   Stack = মানচিত্র
+   Positioned = সেই মানচিত্রে pin গাঁথা 📍
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ০৬:
+Which widget helps distribute available space evenly
+in a Row or Column?
+
+  A. Container
+  B. Expanded              ✅ সঠিক উত্তর
+  C. Center
+  D. Align
+
+উত্তর: B — Expanded
+
+ব্যাখ্যা:
+  → Expanded: Row/Column-এর বাকি ফাঁকা জায়গা দখল করে
+  → একাধিক Expanded থাকলে জায়গা সমানভাবে ভাগ হয়
+  → flex property দিয়ে অসমান ভাগ করা যায়
+    যেমন: flex: 2 মানে দ্বিগুণ জায়গা পাবে
+  → Flexible = জায়গা নিতে পারে কিন্তু বাধ্য না
+    Expanded = পুরো বাকি জায়গা নেবেই
+
+💡 মনে রাখো:
+   Expanded = পিৎজা সমান ভাগ
+   যতজন Expanded, তাদের মধ্যে সমান ভাগ হবে 🍕
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ০৭:
+Which property is used to make text bold?
+
+  A. fontSize
+  B. fontWeight            ✅ সঠিক উত্তর
+  C. color
+  D. letterSpacing
+
+উত্তর: B — fontWeight
+
+ব্যাখ্যা:
+  → fontWeight: FontWeight.bold লেখা মোটা করে
+  → FontWeight.bold = FontWeight.w700
+  → w100 (সবচেয়ে চিকন) থেকে w900 (সবচেয়ে মোটা)
+
+  অন্য property-র কাজ:
+  fontSize      = সাইজ বড়/ছোট করে
+  color         = রঙ পরিবর্তন করে
+  letterSpacing = অক্ষরের মাঝে ফাঁক দেয়
+
+💡 মনে রাখো:
+   fontWeight = লেখার ওজন
+   ওজন বেশি → লেখা মোটা ও ভারী! ⚖️
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ০৮:
+Which widget is used to display an image from the internet?
+
+  A. Image.asset
+  B. Image.file
+  C. Image.network         ✅ সঠিক উত্তর
+  D. Image.memory
+
+উত্তর: C — Image.network
+
+ব্যাখ্যা:
+  → Image.network  = ইন্টারনেট URL থেকে ছবি দেখায় 🌐
+  → Image.asset    = অ্যাপের ভেতরের ছবি (লোগো, আইকন)
+  → Image.file     = ফোনের local storage থেকে
+  → Image.memory   = Byte (Uint8List) data থেকে
+
+  ব্যবহার:
+  Image.network("https://example.com/photo.jpg")
+
+💡 মনে রাখো:
+   network = ইন্টারনেট
+   ইন্টারনেটের ছবি → Image.network! 🌐
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ০৯:
+What is the purpose of MediaQuery in Flutter?
+
+  A. To style text
+  B. To access screen size for responsive design    ✅
+  C. To manage database
+  D. To handle navigation
+
+উত্তর: B — Screen size access for responsive design
+
+ব্যাখ্যা:
+  → MediaQuery.of(context).size.width  = স্ক্রিনের প্রস্থ
+  → MediaQuery.of(context).size.height = স্ক্রিনের উচ্চতা
+  → MediaQuery.of(context).orientation = Portrait/Landscape
+  → স্ক্রিন ছোট হলে মোবাইল UI, বড় হলে ট্যাবলেট UI
+
+  ভুল অপশন:
+  Text style → TextStyle এর কাজ
+  Database   → sqflite / Firebase এর কাজ
+  Navigation → Navigator / GoRouter এর কাজ
+
+💡 মনে রাখো:
+   MediaQuery = Flutter-এর মাপার ফিতা 📏
+   স্ক্রিন মেপে Responsive UI বানাও!
+----------------------------------------------------------------
+
+
+----------------------------------------------------------------
+প্রশ্ন ১০:
+What is the main purpose of integrating AI APIs
+(like ChatGPT Vision or Gemini Vision) in apps?
+
+  A. To increase app size
+  B. To enable intelligent features like image analysis
+     and chat                                        ✅
+  C. To design UI
+  D. To reduce performance
+
+উত্তর: B — Intelligent features (image analysis & chat)
+
+ব্যাখ্যা:
+  → AI API যুক্ত করলে অ্যাপ বুদ্ধিমান হয়
+  → ছবি দেখে বলতে পারে, প্রশ্নের উত্তর দেয়, অনুবাদ করে
+  → AI API অ্যাপের বাইরে থাকে — HTTP দিয়ে call হয়
+    তাই app size বাড়ে না ❌ (Option A ভুল)
+  → ChatGPT Vision = OpenAI | Gemini Vision = Google
+
+  বাস্তব উদাহরণ:
+  Google Lens, Health App, Translator — সব AI API ব্যবহার করে
+
+💡 মনে রাখো:
+   AI API = মস্তিষ্ক ভাড়া করা 🧠
+   নিজে বুদ্ধি না থাকলেও অ্যাপ স্মার্ট হয়ে যায়!
+----------------------------------------------------------------
+
+
+================================================================
+                    দ্রুত রিভিশন টেবিল
+================================================================
+
+ Q01 | Flutter architecture rendering    | C. Engine Layer
+ Q02 | Stateless vs Stateful             | C. Stateful updates UI
+ Q03 | Basic screen structure widget     | B. Scaffold
+ Q04 | Overlapping children widget       | C. Stack
+ Q05 | Positioned widget role            | C. Inside a Stack
+ Q06 | Distribute space in Row/Column    | B. Expanded
+ Q07 | Make text bold                    | B. fontWeight
+ Q08 | Image from internet              | C. Image.network
+ Q09 | Screen size for responsive design | B. MediaQuery
+ Q10 | AI API main purpose              | B. Intelligent features
+
+================================================================
+   Flutter MCQ Notes | পড়ো, বোঝো, মনে রাখো | শুভকামনা 🚀
+================================================================
