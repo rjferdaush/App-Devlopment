@@ -1,0 +1,715 @@
+
+╔══════════════════════════════════════════════════════════════╗
+║              Flutter — AppBar সম্পূর্ণ নোট                  ║
+╚══════════════════════════════════════════════════════════════╝
+
+AppBar কী?
+───────────
+AppBar হলো Scaffold এর উপরের bar।
+প্রতিটা screen এ title, navigation icon, action button
+সব কিছু এখানে থাকে।
+
+Structure:
+┌──────────────────────────────────────────────────┐
+│  [leading]   [  title  ]   [actions...]          │
+│──────────────────────────────────────────────────│
+│              [bottom / TabBar]                   │
+└──────────────────────────────────────────────────┘
+
+
+══════════════════════════════════════════════════════════════
+PART 1 — title (শিরোনাম)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  title: Text('My App'),
+)
+
+title এ যা যা দেওয়া যায়:
+────────────────────────────
+
+► শুধু Text:
+  title: Text(
+    'My App',
+    style: TextStyle(
+      fontSize: 20,
+      fontWeight: FontWeight.bold,
+      color: Colors.white,
+      letterSpacing: 1.5,
+    ),
+  ),
+
+► Image / Logo:
+  title: Image.asset('assets/logo.png', height: 40),
+
+► Row — icon + text একসাথে:
+  title: Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Icon(Icons.flutter_dash, color: Colors.white),
+      SizedBox(width: 8),
+      Text('My App'),
+    ],
+  ),
+
+► Search bar:
+  title: TextField(
+    decoration: InputDecoration(
+      hintText: 'Search...',
+      hintStyle: TextStyle(color: Colors.white70),
+      border: InputBorder.none,
+    ),
+    style: TextStyle(color: Colors.white),
+  ),
+
+
+══════════════════════════════════════════════════════════════
+PART 2 — centerTitle (title এর অবস্থান)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  centerTitle: true,   // → title মাঝে থাকবে
+  centerTitle: false,  // → title বামে থাকবে (Android default)
+)
+
+► iOS এ default true (মাঝে)।
+► Android এ default false (বামে)।
+► নিজে set করলে সব platform এ একই থাকে।
+
+
+══════════════════════════════════════════════════════════════
+PART 3 — leading (বাম দিকের icon)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  leading: IconButton(
+    icon: Icon(Icons.menu),
+    onPressed: () {
+      Scaffold.of(context).openDrawer(); // Drawer খোলো
+    },
+  ),
+)
+
+leading এ যা যা দেওয়া যায়:
+─────────────────────────────
+
+► Back button:
+  leading: BackButton(color: Colors.white),
+  // → Navigator.pop(context) নিজেই call করে।
+
+► Close button:
+  leading: CloseButton(),
+  // → Dialog বা bottom sheet বন্ধ করার জন্য।
+
+► Custom icon:
+  leading: IconButton(
+    icon: Icon(Icons.arrow_back_ios),
+    tooltip: 'পেছনে যাও',
+    onPressed: () => Navigator.pop(context),
+  ),
+
+► CircleAvatar / Profile photo:
+  leading: Padding(
+    padding: EdgeInsets.all(8),
+    child: CircleAvatar(
+      backgroundImage: NetworkImage('url'),
+    ),
+  ),
+
+► কিছুই না:
+  leading: SizedBox(),
+  // → leading এর জায়গা ফাঁকা রাখো।
+
+► leadingWidth দিয়ে leading এর width বাড়ানো যায়:
+  leadingWidth: 80,
+  leading: TextButton(
+    onPressed: () {},
+    child: Text('Cancel', style: TextStyle(color: Colors.white)),
+  ),
+
+
+══════════════════════════════════════════════════════════════
+PART 4 — automaticallyImplyLeading
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  automaticallyImplyLeading: true,
+  // → true (default):
+  //   Drawer থাকলে → hamburger (menu) icon দেখায়।
+  //   আগের screen থাকলে → back arrow দেখায়।
+  //   Flutter নিজেই বুঝে নেয়।
+
+  // → false:
+  //   কোনো icon দেখাবে না।
+  //   leading একদম ফাঁকা থাকবে।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 5 — actions (ডান দিকের icon গুলো)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  actions: [
+    // ── সাধারণ icon button ──────────────────────
+    IconButton(
+      icon: Icon(Icons.search),
+      tooltip: 'Search করো',        // ধরে রাখলে hint দেখায়
+      onPressed: () {},
+    ),
+
+    // ── Notification badge সহ ───────────────────
+    Badge(
+      label: Text('3'),              // badge এর সংখ্যা
+      backgroundColor: Colors.red,
+      child: IconButton(
+        icon: Icon(Icons.notifications),
+        onPressed: () {},
+      ),
+    ),
+
+    // ── 3 dot Popup menu ────────────────────────
+    PopupMenuButton<String>(
+      icon: Icon(Icons.more_vert),
+      tooltip: 'আরো option',
+      onSelected: (String value) {
+        if (value == 'settings') { /* settings এ যাও */ }
+        if (value == 'logout')   { /* logout করো */ }
+      },
+      itemBuilder: (BuildContext context) => [
+        PopupMenuItem(
+          value: 'settings',
+          child: Row(
+            children: [
+              Icon(Icons.settings, size: 18),
+              SizedBox(width: 8),
+              Text('Settings'),
+            ],
+          ),
+        ),
+        PopupMenuDivider(),          // divider line
+        PopupMenuItem(
+          value: 'logout',
+          child: Row(
+            children: [
+              Icon(Icons.logout, size: 18, color: Colors.red),
+              SizedBox(width: 8),
+              Text('Logout', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+        ),
+      ],
+    ),
+
+    // ── Text button ─────────────────────────────
+    TextButton(
+      onPressed: () {},
+      child: Text('Save', style: TextStyle(color: Colors.white)),
+    ),
+
+    // ── Switch / Toggle ─────────────────────────
+    Switch(
+      value: _isDarkMode,
+      onChanged: (val) { setState(() { _isDarkMode = val; }); },
+    ),
+  ],
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 6 — backgroundColor (AppBar এর রং)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  // ── সাধারণ রং ───────────────────────────────
+  backgroundColor: Colors.blue,
+  backgroundColor: Colors.deepPurple,
+  backgroundColor: Color(0xFF1A1A2E),   // hex রং
+
+  // ── Transparent ─────────────────────────────
+  backgroundColor: Colors.transparent,
+  elevation: 0,
+  // → AppBar দেখা যাবে না, body উপরে উঠে আসবে।
+
+  // ── Gradient দিতে চাইলে ─────────────────────
+  // backgroundColor transparent করে flexibleSpace ব্যবহার করো:
+  backgroundColor: Colors.transparent,
+  flexibleSpace: Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.blue, Colors.purple],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+    ),
+  ),
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 7 — foregroundColor (লেখা ও icon এর রং)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  foregroundColor: Colors.white,
+  // → title এর লেখা, leading icon, actions icon
+  //   সব কিছুর রং একসাথে পরিবর্তন হয়।
+  // → আলাদা আলাদা করতে চাইলে iconTheme ও titleTextStyle ব্যবহার করো।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 8 — elevation ও shadowColor
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  elevation: 4.0,
+  // → AppBar এর নিচে ছায়া কতটুকু পড়বে।
+  // → 0    = কোনো ছায়া নেই (flat look)
+  // → 4    = default
+  // → 10+  = অনেক বেশি ছায়া
+
+  shadowColor: Colors.black,
+  // → ছায়ার রং পরিবর্তন করা যায়।
+  // → shadowColor: Colors.blue → নীল ছায়া।
+
+  scrolledUnderElevation: 8.0,
+  // → Body scroll করলে AppBar এর elevation বাড়ে।
+  // → Material 3 এ কাজ করে।
+  // → 0 দিলে scroll করলেও elevation বাড়বে না।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 9 — shape (AppBar এর আকৃতি)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  // ── নিচে গোলাকার ────────────────────────────
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(
+      bottom: Radius.circular(24),
+    ),
+  ),
+
+  // ── সব দিকে গোলাকার ─────────────────────────
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.circular(16),
+  ),
+
+  // ── তির্যক (diagonal) কোণ ───────────────────
+  shape: BeveledRectangleBorder(
+    borderRadius: BorderRadius.vertical(
+      bottom: Radius.circular(20),
+    ),
+  ),
+
+  // ── Border সহ ────────────────────────────────
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+    side: BorderSide(color: Colors.white24, width: 1),
+  ),
+)
+
+⚠️ shape ব্যবহার করলে clipBehavior: Clip.antiAlias দিতে হবে।
+
+
+══════════════════════════════════════════════════════════════
+PART 10 — toolbarHeight (AppBar এর উচ্চতা)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  toolbarHeight: 56,    // default
+  toolbarHeight: 80,    // বড় AppBar — বেশি জায়গা
+  toolbarHeight: 40,    // ছোট AppBar — কম জায়গা
+)
+
+► বড় করলে: logo বা search bar রাখার জায়গা বেশি পাওয়া যায়।
+► ছোট করলে: body এর জন্য বেশি জায়গা থাকে।
+
+
+══════════════════════════════════════════════════════════════
+PART 11 — bottom (AppBar এর নিচে TabBar)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  bottom: TabBar(
+    controller: _tabController,       // TabController লাগবে
+
+    tabs: [
+      Tab(icon: Icon(Icons.home),    text: 'Home'),
+      Tab(icon: Icon(Icons.search),  text: 'Search'),
+      Tab(icon: Icon(Icons.person),  text: 'Profile'),
+    ],
+
+    labelColor: Colors.white,         // selected tab এর রং
+    unselectedLabelColor: Colors.white60, // unselected রং
+    labelStyle: TextStyle(fontWeight: FontWeight.bold),
+
+    indicatorColor: Colors.white,     // নিচের line এর রং
+    indicatorWeight: 3.0,             // line এর মোটা
+    indicatorSize: TabBarIndicatorSize.tab, // tab / label
+
+    isScrollable: true,               // অনেক tab → scroll হবে
+
+    // Custom indicator (box shape):
+    indicator: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: Colors.white24,
+    ),
+
+    dividerColor: Colors.transparent, // TabBar এর নিচের line সরাও
+  ),
+)
+
+TabController বানানোর নিয়ম:
+──────────────────────────────
+class _MyPageState extends State<MyPage>
+    with SingleTickerProviderStateMixin {
+
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(
+      length: 3,      // tab সংখ্যা
+      vsync: this,
+      initialIndex: 0 // শুরুতে কোন tab selected
+    );
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose(); // memory leak এড়াতে
+    super.dispose();
+  }
+}
+
+TabBar এর সাথে TabBarView:
+────────────────────────────
+body: TabBarView(
+  controller: _tabController,
+  children: [
+    HomeScreen(),
+    SearchScreen(),
+    ProfileScreen(),
+  ],
+),
+
+
+══════════════════════════════════════════════════════════════
+PART 12 — flexibleSpace (AppBar এর পেছনের layer)
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  // ── Gradient background ──────────────────────
+  backgroundColor: Colors.transparent,
+  flexibleSpace: Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.deepPurple, Colors.blue],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      ),
+    ),
+  ),
+
+  // ── Image background ─────────────────────────
+  flexibleSpace: Image.asset(
+    'assets/appbar_bg.png',
+    fit: BoxFit.cover,
+  ),
+
+  // ── Blurred background ───────────────────────
+  flexibleSpace: ClipRect(
+    child: BackdropFilter(
+      filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+      child: Container(color: Colors.white.withOpacity(0.1)),
+    ),
+  ),
+)
+
+► flexibleSpace AppBar এর সম্পূর্ণ পেছনে বসে।
+► title, leading, actions এর নিচে এটা থাকে।
+► SliverAppBar এ এটা অনেক বেশি ব্যবহার হয়।
+
+
+══════════════════════════════════════════════════════════════
+PART 13 — toolbarOpacity ও bottomOpacity
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  toolbarOpacity: 1.0,
+  // → AppBar এর উপরের অংশ (title, icons) কতটা দেখা যাবে।
+  // → 0.0 = সম্পূর্ণ অদৃশ্য
+  // → 1.0 = সম্পূর্ণ দৃশ্যমান (default)
+  // → SliverAppBar এ scroll animation এর জন্য কাজে লাগে।
+
+  bottomOpacity: 1.0,
+  // → bottom (TabBar) কতটা দেখা যাবে।
+  // → 0.0 = TabBar অদৃশ্য
+  // → SliverAppBar collapse হলে TabBar ধীরে ধীরে মিলিয়ে যায়।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 14 — titleSpacing
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  titleSpacing: 16.0,
+  // → leading icon ও title এর মাঝে ফাঁকা।
+  // → Default: NavigationToolbar.kMiddleSpacing (16.0)
+  // → 0 দিলে title একদম leading এর পাশে চলে আসে।
+
+  // উদাহরণ — Custom search bar full width এ রাখতে:
+  leading: SizedBox(),
+  titleSpacing: 8,
+  title: TextField(
+    decoration: InputDecoration(hintText: 'Search...'),
+  ),
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 15 — iconTheme ও actionsIconTheme
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  iconTheme: IconThemeData(
+    color: Colors.white,     // leading icon এর রং
+    size: 28.0,              // leading icon এর size
+    opacity: 1.0,            // leading icon এর opacity
+  ),
+  // → শুধু leading icon এ কাজ করে।
+
+  actionsIconTheme: IconThemeData(
+    color: Colors.yellow,    // actions icons এর রং আলাদা করা যায়
+    size: 24.0,
+  ),
+  // → শুধু actions এর icon গুলোতে কাজ করে।
+
+  // ফলাফল:
+  // leading icon → সাদা, বড়
+  // actions icon → হলুদ, ছোট
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 16 — titleTextStyle ও toolbarTextStyle
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  titleTextStyle: TextStyle(
+    fontSize: 22,
+    fontWeight: FontWeight.bold,
+    color: Colors.white,
+    fontFamily: 'Roboto',
+    letterSpacing: 1.2,
+  ),
+  // → শুধু title এর text style।
+
+  toolbarTextStyle: TextStyle(
+    fontSize: 14,
+    color: Colors.white70,
+  ),
+  // → AppBar এর বাকি সব text (actions এর TextButton লেখা ইত্যাদি) এর style।
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 17 — forceMaterialTransparency
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  forceMaterialTransparency: true,
+  // → AppBar সম্পূর্ণ transparent হয়।
+  // → Scroll করলেও রং আসে না (scrolledUnderElevation কাজ করে না)।
+  // → extendBodyBehindAppBar: true এর সাথে ব্যবহার করলে
+  //   body এর image বা content AppBar এর পেছনেও দেখা যায়।
+  // → Full screen image বা hero section এ কাজে লাগে।
+
+  // পুরো example:
+  // Scaffold(
+  //   extendBodyBehindAppBar: true,
+  //   appBar: AppBar(
+  //     forceMaterialTransparency: true,
+  //     backgroundColor: Colors.transparent,
+  //     elevation: 0,
+  //   ),
+  //   body: Image.asset('assets/hero.jpg', fit: BoxFit.cover),
+  // )
+)
+
+
+══════════════════════════════════════════════════════════════
+PART 18 — clipBehavior
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  clipBehavior: Clip.antiAlias,
+  // → AppBar এর ভেতরের content কীভাবে clip হবে।
+  // → Shape দেওয়া থাকলে এটা দেওয়া দরকার নাহলে
+  //   content shape এর বাইরে চলে যেতে পারে।
+
+  // Clip.none         → কোনো clip নেই
+  // Clip.hardEdge     → সরাসরি কেটে দেয় (দ্রুত, কম মসৃণ)
+  // Clip.antiAlias    → মসৃণভাবে কাটে (recommended)
+  // Clip.antiAliasWithSaveLayer → সবচেয়ে মসৃণ (ধীর)
+)
+
+
+══════════════════════════════════════════════════════════════
+BONUS — SliverAppBar (scroll করলে লুকিয়ে যায়)
+══════════════════════════════════════════════════════════════
+
+CustomScrollView(
+  slivers: [
+    SliverAppBar(
+      title: Text('My App'),
+      pinned: true,       // scroll করলেও AppBar থাকবে
+      floating: false,    // উপরে scroll করলে দ্রুত দেখাবে
+      snap: false,        // floating: true হলে কাজ করে
+      expandedHeight: 200.0, // সর্বোচ্চ উচ্চতা
+
+      flexibleSpace: FlexibleSpaceBar(
+        title: Text('My App'),
+        background: Image.asset('assets/bg.jpg', fit: BoxFit.cover),
+        collapseMode: CollapseMode.parallax, // parallax scroll effect
+      ),
+    ),
+
+    SliverList(
+      delegate: SliverChildBuilderDelegate(
+        (context, index) => ListTile(title: Text('Item $index')),
+        childCount: 30,
+      ),
+    ),
+  ],
+)
+
+pinned vs floating vs snap:
+─────────────────────────────
+pinned: true, floating: false → scroll করলে ছোট হয়, কিন্তু থাকে
+pinned: false, floating: true → উপরে scroll করলে দ্রুত আসে
+pinned: true, floating: true  → সবসময় থাকে + উপরে scrollে দ্রুত আসে
+snap: true (floating লাগবে)  → অর্ধেক দেখা গেলে পুরোটা এসে যায়
+
+
+══════════════════════════════════════════════════════════════
+সব Properties একসাথে — চূড়ান্ত AppBar
+══════════════════════════════════════════════════════════════
+
+AppBar(
+  // ─── Content ──────────────────────────────────────────
+  leading: IconButton(icon: Icon(Icons.menu), onPressed: () {}),
+  leadingWidth: 56,
+  automaticallyImplyLeading: true,
+  title: Text('My App'),
+  centerTitle: true,
+  titleSpacing: 16,
+  actions: [
+    IconButton(icon: Icon(Icons.search), onPressed: () {}),
+    PopupMenuButton(itemBuilder: (c) => []),
+  ],
+
+  // ─── রং ও ডিজাইন ──────────────────────────────────────
+  backgroundColor: Colors.deepPurple,
+  foregroundColor: Colors.white,
+  elevation: 4,
+  scrolledUnderElevation: 8,
+  shadowColor: Colors.black,
+  shape: RoundedRectangleBorder(
+    borderRadius: BorderRadius.vertical(bottom: Radius.circular(16)),
+  ),
+  clipBehavior: Clip.antiAlias,
+
+  // ─── Background ────────────────────────────────────────
+  flexibleSpace: Container(
+    decoration: BoxDecoration(
+      gradient: LinearGradient(
+        colors: [Colors.deepPurple, Colors.blue],
+      ),
+    ),
+  ),
+  forceMaterialTransparency: false,
+
+  // ─── Size ──────────────────────────────────────────────
+  toolbarHeight: 60,
+
+  // ─── Text ও Icon Style ─────────────────────────────────
+  titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+  toolbarTextStyle: TextStyle(fontSize: 14),
+  iconTheme: IconThemeData(color: Colors.white, size: 26),
+  actionsIconTheme: IconThemeData(color: Colors.white70, size: 24),
+
+  // ─── Opacity ───────────────────────────────────────────
+  toolbarOpacity: 1.0,
+  bottomOpacity: 1.0,
+
+  // ─── TabBar নিচে ──────────────────────────────────────
+  bottom: TabBar(
+    controller: _tabController,
+    tabs: [
+      Tab(text: 'Home'),
+      Tab(text: 'Search'),
+      Tab(text: 'Profile'),
+    ],
+    indicatorColor: Colors.white,
+    labelColor: Colors.white,
+    unselectedLabelColor: Colors.white60,
+  ),
+)
+
+
+══════════════════════════════════════════════════════════════
+Visual — AppBar এর ভেতরে কোনটা কোথায়
+══════════════════════════════════════════════════════════════
+
+┌─────────────────────────────────────────────────────────┐
+│                    flexibleSpace                        │  ← পেছনে
+│  ┌─────┐  ┌──────────────────────┐  ┌────┐ ┌────┐ ┌─┐ │
+│  │lead │  │       title          │  │act1│ │act2│ │⋮│ │
+│  └─────┘  └──────────────────────┘  └────┘ └────┘ └─┘ │
+│─────────────────────────────────────────────────────────│
+│              bottom (TabBar)                            │
+└─────────────────────────────────────────────────────────┘
+     ▲               ▲                    ▲
+  leading          title               actions
+
+
+══════════════════════════════════════════════════════════════
+Summary Table — সব Properties
+══════════════════════════════════════════════════════════════
+
+Property                   | কাজ                          | দরকারি?
+───────────────────────────|──────────────────────────────|─────────
+title                      | শিরোনাম                      | ✅
+centerTitle                | মাঝে রাখো                    | ✅
+leading                    | বাম দিকের icon               | 🔶
+leadingWidth               | leading এর width             | 🔷
+automaticallyImplyLeading  | auto back/menu icon          | 🔶
+actions                    | ডান দিকের icons              | ✅
+backgroundColor            | AppBar এর রং                 | ✅
+foregroundColor            | লেখা ও icon এর রং            | ✅
+elevation                  | ছায়া                         | 🔶
+scrolledUnderElevation     | scroll এ elevation           | 🔶
+shadowColor                | ছায়ার রং                     | 🔷
+shape                      | AppBar এর আকৃতি              | 🔶
+clipBehavior               | content clip                 | 🔷
+toolbarHeight              | উচ্চতা                       | 🔶
+bottom                     | TabBar নিচে                  | 🔶
+flexibleSpace              | gradient/image background    | 🔶
+forceMaterialTransparency  | পুরো transparent             | 🔷
+toolbarOpacity             | উপর অংশ opacity              | 🔷
+bottomOpacity              | TabBar opacity               | 🔷
+titleSpacing               | title এর ফাঁকা               | 🔷
+iconTheme                  | leading icon style           | 🔶
+actionsIconTheme           | actions icon style           | 🔶
+titleTextStyle             | title এর font                | 🔶
+toolbarTextStyle           | বাকি text font               | 🔷
+
+✅ = প্রায় সবসময়   🔶 = দরকার হলে   🔷 = খুব কম
+
+══════════════════════════════════════════════════════════════
