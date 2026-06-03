@@ -73,7 +73,6 @@ class BloodRequestCard extends StatelessWidget {
     required this.unitsNeeded,
     required this.location,
   });
-
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -88,30 +87,26 @@ class BloodRequestCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Left red accent bar
             Container(
               width: 5,
-              color: const Color(0xFFE53935), // Urgent Red
+              color: const Color(0xFFE53935), 
             ),
-            // Card Content
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Top Row: Urgent Badge and Units Needed
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // Urgent Badge
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 10,
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFFFEBEE), // Very light red
+                            color: const Color(0xFFFFEBEE), 
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: const Text(
@@ -124,7 +119,6 @@ class BloodRequestCard extends StatelessWidget {
                             ),
                           ),
                         ),
-                        // Units Needed
                         Row(
                           children: [
                             const Icon(
@@ -146,7 +140,6 @@ class BloodRequestCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    // Blood Type Title
                     Text(
                       '$bloodType Blood Needed',
                       style: const TextStyle(
@@ -156,7 +149,6 @@ class BloodRequestCard extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 8),
-                    // Location Row
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -181,12 +173,10 @@ class BloodRequestCard extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 16),
-                    // View Details Button
                     SizedBox(
                       width: double.infinity,
                       child: ElevatedButton(
                         onPressed: () {
-                          // Perform action or print message
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: const Color(0xFF102A56),
