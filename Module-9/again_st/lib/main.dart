@@ -34,7 +34,7 @@ class _HomePageState extends State<HomePage> {
         centerTitle: true,
         backgroundColor: Colors.amber,
         title: Text(
-          "Again WE Do A Project",
+          "Project Online",
           style: TextStyle(
             color: Colors.blueAccent,
             letterSpacing: 2,
